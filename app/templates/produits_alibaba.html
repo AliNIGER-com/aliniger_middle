@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Produits Alibaba | AliNiger</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+  <style>
+    body {
+      background-color: #f8f9fa;
+      font-family: 'Segoe UI', sans-serif;
+    }
+    h2 {
+      margin-top: 30px;
+      font-weight: bold;
+      color: #fd7e14;
+    }
+    img {
+      max-width: 80px;
+      height: auto;
+      border-radius: 8px;
+      margin-right: 5px;
+    }
+    .badge-categorie {
+      font-size: 0.85rem;
+      background-color: #fd7e14;
+      color: #fff;
+    }
+    .btn-action {
+      margin: 2px;
+    }
+    .table-hover tbody tr:hover {
+      background-color: #fff3cd;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container my-5">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="text-warning">🇨🇳 Catalogue des Produits Alibaba</h2>
+    <a href="{{ url_for('web_routes.dashboard') }}" class="btn btn-outline-dark">← Retour au Dashboard</a>
+  </div>
+
+  {% if produits_alibaba %}
+    <div class="table-responsive">
+      <table class="table table-bordered table-striped table-hover align-middle">
+        <thead class="table-warning text-center">
+          <tr>
+            <th>Nom</th>
+            <th>Images</th>
+            <th>Prix Estimé</th>
+            <th>Catégorie</th>
+            <th>Couleur</th>
+            <th>Min Commande</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in produits_alibaba %}
+            <tr>
+              <td class="fw-semibold">{{ p.nom }}</td>
+              <td>
+                {% for img in p.image.split(',') if img %}
+                  <img src="{{ url_for('static', filename='uploads/images/' ~ img) }}" alt="Image produit" />
+                {% endfor %}
+              </td>
+              <td>{{ p.prix_estime }} $</td>
+              <td><span class="badge badge-categorie">{{ p.categorie }}</span></td>
+              <td>{{ p.couleur }}</td>
+              <td>{{ p.min_commande }}</td>
+              <td class="text-center">
+                <a href="{{ url_for('web_routes.modifier_produit_alibaba', id=p.id) }}" class="btn btn-sm btn-outline-primary btn-action">✏️ Modifier</a>
+                <form action="{{ url_for('web_routes.supprimer_produit_alibaba', id=p.id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Supprimer ce produit ?')">
+                  <button type="submit" class="btn btn-sm btn-outline-danger btn-action">🗑 Supprimer</button>
+                </form>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="alert alert-info text-center">
+      Aucun produit Alibaba enregistré.
+    </div>
+  {% endif %}
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

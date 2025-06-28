@@ -1,0 +1,34 @@
+from flask import Flask
+from flask_sqlalchemy import SQLAlchemy
+from flask_cors import CORS
+from flask_login import LoginManager
+from .config import Config
+
+# Initialisation des extensions
+db = SQLAlchemy()
+login_manager = LoginManager()
+
+# Import du modèle ici uniquement pour user_loader
+from .models import Vendeur
+
+def create_app():
+    app = Flask(__name__)
+    app.config.from_object(Config)
+
+    # Initialisation des extensions avec l'app
+    db.init_app(app)
+    CORS(app)
+    login_manager.init_app(app)
+
+    # Configuration de Flask-Login
+    login_manager.login_view = 'web_routes.login_vendeur'  # Utilise le nom Blueprint.route
+
+    @login_manager.user_loader
+    def load_user(user_id):
+        return Vendeur.query.get(int(user_id))
+
+    # Enregistrement des blueprints
+    from .routes import register_routes
+    register_routes(app)
+
+    return app

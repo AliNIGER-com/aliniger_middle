@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mon Espace Boutique | AliNiger</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #121212;
+            color: #f8f9fa;
+            font-family: 'Segoe UI', sans-serif;
+        }
+        .card {
+            border: none;
+            border-radius: 1rem;
+            background-color: #1f1f1f;
+            color: #fff;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+        }
+        .section-title {
+            color: #f0ad4e;
+        }
+        .stat-value {
+            font-size: 2rem;
+            color: #28a745;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container py-5">
+    <h2 class="text-center mb-5 text-warning">🎉 Bienvenue dans votre boutique, {{ vendeur.nom }}</h2>
+
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card p-4">
+                <h5 class="section-title">🏪 Nom de la boutique</h5>
+                <p class="stat-value">{{ vendeur.boutique.nom }}</p>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card p-4">
+                <h5 class="section-title">⭐ Note moyenne</h5>
+                <p class="stat-value">{{ vendeur.boutique.note }} / 5</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card p-4">
+                <h5 class="section-title">📦 Produits en boutique</h5>
+                <ul>
+                    {% for produit in vendeur.boutique.produits %}
+                        <li>{{ produit.nom }} - {{ produit.prix }} FCFA</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card p-4">
+                <h5 class="section-title">💰 Nombre total de ventes</h5>
+                <p class="stat-value">{{ total_ventes }}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card p-4">
+                <h5 class="section-title">🔥 Meilleurs produits</h5>
+                <ul>
+                    {% for produit in meilleurs_produits %}
+                        <li>{{ produit.nom }} - {{ produit.nombre_ventes }} ventes</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mt-5 p-4">
+    <h4 class="text-success">🎯 Lancer une promotion</h4>
+    <form action="{{ url_for('lancer_promo') }}" method="POST" class="row g-3 mt-2">
+        <div class="col-md-6">
+    <label for="produit_id" class="form-label">Produit</label>
+    <select name="produit_id" id="produit_id" class="form-select" required>
+        {% for produit in vendeur.produits_afrique %}
+            <option value="{{ produit.id }}">{{ produit.nom }} - {{ produit.prix }} FCFA</option>
+        {% endfor %}
+    </select>
+</div>
+
+
+        <div class="col-md-4">
+            <label class="form-label">Remise (%)</label>
+            <input type="number" class="form-control" name="remise" placeholder="ex: 15" min="1" max="90" required>
+        </div>
+
+        <div class="col-md-2 d-flex align-items-end">
+            <button type="submit" class="btn btn-warning w-100">Appliquer 🔥</button>
+        </div>
+    </form>
+</div>
+
+
+    <div class="text-center mt-5">
+        <h5 class="text-muted">🙏 Merci de faire confiance à <strong>AliNiger</strong>, le 1er marché B2B Nigérien !</h5>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
