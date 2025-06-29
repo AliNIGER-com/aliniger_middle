@@ -1,11 +1,13 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
+from flask_migrate import Migrate
 from flask_login import LoginManager
 from .config import Config
 
 # Initialisation des extensions
 db = SQLAlchemy()
+migrate = Migrate()  # <-- Ajouté ici
 login_manager = LoginManager()
 
 # Import du modèle ici uniquement pour user_loader
@@ -17,6 +19,7 @@ def create_app():
 
     # Initialisation des extensions avec l'app
     db.init_app(app)
+    migrate.init_app(app, db)  # <-- Ajouté ici
     CORS(app)
     login_manager.init_app(app)
 
