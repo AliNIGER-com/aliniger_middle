@@ -388,3 +388,43 @@ def demande_reset_mdp():
     # Vérifie si l'email existe, génère un token, envoie le lien par email
     flash("Un lien de réinitialisation a été envoyé à votre adresse email.", "success")
     return redirect(url_for('web_routes.login_vendeur'))
+
+@web_routes.route('/produits_recents', methods=['GET'])
+def produits_recents():
+    # Récupère les 10 derniers produits de chaque source
+    produits_afrique = ProduitAfrique.query.order_by(desc(ProduitAfrique.id)).limit(10).all()
+    produits_alibaba = ProduitAlibaba.query.order_by(desc(ProduitAlibaba.id)).limit(10).all()
+
+    resultats = []
+
+    for p in produits_afrique:
+        resultats.append({
+            'id': p.id,
+            'nom': p.nom,
+            'description': p.description,
+            'prix': p.prix,
+            'images': p.image.split(',') if p.image else [],
+            'categorie': p.categorie,
+            'source': 'afrique',
+            'origine': p.pays_origine,
+            'boutique_id': p.boutique_id,
+            'vendeur_id': p.vendeur_id,
+        })
+
+    for p in produits_alibaba:
+        resultats.append({
+            'id': p.id,
+            'nom': p.nom,
+            'description': p.description,
+            'prix': p.prix_estime,
+            'images': p.image.split(',') if p.image else [],
+            'categorie': getattr(p, 'categorie', 'alibaba'),
+            'source': 'alibaba',
+            'origine': 'Chine',
+            'vendeur': p.vendeur
+        })
+
+    # Trie tous les produits ensemble par ID décroissant
+    resultats.sort(key=lambda x: x['id'], reverse=True)
+
+    return jsonify(resultats[:10]), 200
