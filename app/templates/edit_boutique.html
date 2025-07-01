@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-5">
+  <h2 class="mb-4">🏬 Modifier Boutique</h2>
+
+  <form method="POST" enctype="multipart/form-data">
+    {{ form.hidden_tag() }}
+
+    <div class="mb-3">{{ form.nom.label }} {{ form.nom(class="form-control") }}</div>
+    <div class="mb-3">{{ form.description.label }} {{ form.description(class="form-control") }}</div>
+    <div class="mb-3">{{ form.localisation.label }} {{ form.localisation(class="form-control") }}</div>
+    <div class="mb-3">{{ form.note.label }} {{ form.note(class="form-control") }}</div>
+    <div class="mb-3">{{ form.pays.label }} {{ form.pays(class="form-control") }}</div>
+    <div class="mb-3">{{ form.vendeur_id.label }} {{ form.vendeur_id(class="form-select") }}</div>
+
+    <div class="mb-3">
+      <label for="images">📸 Nouvelles images (facultatif)</label>
+      <input type="file" name="images" id="images" class="form-control" multiple>
+      {% if boutique.image %}
+        <small class="text-muted">Images actuelles : {{ boutique.image }}</small>
+      {% endif %}
+    </div>
+
+    <div class="mb-3">
+      <label for="videos">🎥 Nouvelles vidéos (facultatif)</label>
+      <input type="file" name="videos" id="videos" class="form-control" multiple>
+      {% if boutique.video %}
+        <small class="text-muted">Vidéos actuelles : {{ boutique.video }}</small>
+      {% endif %}
+    </div>
+
+    <button class="btn btn-primary" type="submit">💾 Mettre à jour</button>
+    <a class="btn btn-secondary" href="{{ url_for('web_routes.voir_boutique') }}">↩️ Retour</a>
+  </form>
+</div>
+{% endblock %}

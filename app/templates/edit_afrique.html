@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-5">
+  <h2 class="mb-4">✏️ Modifier Produit Afrique</h2>
+
+  <form method="POST" enctype="multipart/form-data">
+    {{ form.hidden_tag() }}
+
+    <div class="mb-3">{{ form.nom.label }} {{ form.nom(class="form-control") }}</div>
+    <div class="mb-3">{{ form.description.label }} {{ form.description(class="form-control") }}</div>
+    <div class="mb-3">{{ form.prix.label }} {{ form.prix(class="form-control") }}</div>
+    <div class="mb-3">{{ form.pays_origine.label }} {{ form.pays_origine(class="form-control") }}</div>
+    <div class="mb-3">{{ form.categorie.label }} {{ form.categorie(class="form-control") }}</div>
+    <div class="mb-3">{{ form.stock.label }} {{ form.stock(class="form-control") }}</div>
+    <div class="mb-3">{{ form.vendeur_id.label }} {{ form.vendeur_id(class="form-select") }}</div>
+    <div class="mb-3">{{ form.boutique_id.label }} {{ form.boutique_id(class="form-select") }}</div>
+
+    <div class="mb-3">
+      <label for="images">📸 Nouvelles images (facultatif)</label>
+      <input type="file" name="images" id="images" class="form-control" multiple>
+      {% if produit.image %}
+        <small class="text-muted">Images actuelles : {{ produit.image }}</small>
+      {% endif %}
+    </div>
+
+    <button class="btn btn-primary" type="submit">💾 Enregistrer</button>
+    <a class="btn btn-secondary" href="{{ url_for('web_routes.voir_afrique') }}">↩️ Retour</a>
+  </form>
+</div>
+{% endblock %}

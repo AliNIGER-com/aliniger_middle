@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">🛠️ Modifier Produit Alibaba</h2>
+    <form method="POST" enctype="multipart/form-data">
+        {{ form.hidden_tag() }}
+
+        <div class="mb-3">
+            {{ form.nom.label(class="form-label") }}
+            {{ form.nom(class="form-control", value=form.nom.data or '') }}
+        </div>
+
+        <div class="mb-3">
+            {{ form.description.label(class="form-label") }}
+            {{ form.description(class="form-control", value=form.description.data or '') }}
+        </div>
+
+        <div class="mb-3">
+            {{ form.prix_estime.label(class="form-label") }}
+            {{ form.prix_estime(class="form-control", value=form.prix_estime.data or '') }}
+        </div>
+
+        <div class="mb-3">
+      <label for="images">📸 Nouvelles images (facultatif)</label>
+      <input type="file" name="images" id="images" class="form-control" multiple>
+      {% if produit.image %}
+        <small class="text-muted">Images actuelles : {{ produit.image }}</small>
+      {% endif %}
+    </div>
+
+        <div class="mb-3">
+            {{ form.min_commande.label(class="form-label") }}
+            {{ form.min_commande(class="form-control", value=form.min_commande.data or '') }}
+        </div>
+
+        <div class="mb-3">
+            {{ form.frais_livraison_estime.label(class="form-label") }}
+            {{ form.frais_livraison_estime(class="form-control", value=form.frais_livraison_estime.data or '') }}
+        </div>
+
+        <div class="mb-3">
+            {{ form.vendeur.label(class="form-label") }}
+            {{ form.vendeur(class="form-control", value=form.vendeur.data or '') }}
+        </div>
+
+        <div class="mb-3">
+            {{ form.note.label(class="form-label") }}
+            {{ form.note(class="form-control", value=form.note.data or '') }}
+        </div>
+
+        <div class="mb-3">
+            {{ form.couleur.label(class="form-label") }}
+            {{ form.couleur(class="form-control", value=form.couleur.data or '') }}
+        </div>
+
+        <button type="submit" class="btn btn-primary">💾 Enregistrer</button>
+        <a href="{{ url_for('web_routes.voir_alibaba') }}" class="btn btn-secondary">↩️ Retour</a>
+    </form>
+</div>
+{% endblock %}

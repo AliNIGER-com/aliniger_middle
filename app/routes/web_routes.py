@@ -344,43 +344,205 @@ def lancer_promo():
 
 @web_routes.route('/admin/boutique/modifier/<int:id>', methods=['GET', 'POST'])
 def modifier_boutique(id):
-    # logique de modification
-    pass
+    boutique = Boutique.query.get_or_404(id)
+    form = BoutiqueForm(obj=boutique)  # Pré-remplir le formulaire
+
+    vendeurs = Vendeur.query.all()
+    form.vendeur_id.choices = [(v.id, f"{v.nom} {v.prenom}") for v in vendeurs]
+
+    if form.validate_on_submit():
+        # Mise à jour des champs texte
+        boutique.nom = form.nom.data
+        boutique.description = form.description.data
+        boutique.localisation = form.localisation.data
+        boutique.note = form.note.data
+        boutique.vendeur_id = form.vendeur_id.data
+        boutique.pays = form.pays.data
+
+        # Mise à jour des images si nouvelles fournies
+        images = request.files.getlist('images')
+        if images and images[0].filename != '':
+            image_filenames = []
+            for image in images:
+                filename = secure_filename(image.filename)
+                image_path = os.path.join(UPLOAD_FOLDER_IMAGES, filename)
+                image.save(image_path)
+                image_filenames.append(filename)
+            boutique.image = ",".join(image_filenames)
+
+        # Mise à jour des vidéos si nouvelles fournies
+        videos = request.files.getlist('videos')
+        if videos and videos[0].filename != '':
+            video_filenames = []
+            for video in videos:
+                filename = secure_filename(video.filename)
+                video_path = os.path.join(UPLOAD_FOLDER_VIDEOS, filename)
+                video.save(video_path)
+                video_filenames.append(filename)
+            boutique.video = ",".join(video_filenames)
+
+        db.session.commit()
+        flash("✅ Boutique mise à jour avec succès !", "success")
+        return redirect(url_for('web_routes.voir_boutique'))
+
+    return render_template('edit_boutique.html', form=form, boutique=boutique)
+
 
 @web_routes.route('/admin/boutique/supprimer/<int:id>', methods=['POST'])
 def supprimer_boutique(id):
-    # logique de suppression
-    pass
+    boutique = Boutique.query.get_or_404(id)
+
+    try:
+        db.session.delete(boutique)
+        db.session.commit()
+        flash("🗑️ Boutique supprimée avec succès.", "success")
+    except:
+        db.session.rollback()
+        flash("❌ Une erreur est survenue lors de la suppression.", "danger")
+
+    return redirect(url_for('web_routes.voir_boutique'))
 
 @web_routes.route('/admin/produit_afrique/modifier/<int:id>', methods=['GET', 'POST'])
 def modifier_produit_afrique(id):
-    # logique de modification
-    pass
+    produit = ProduitAfrique.query.get_or_404(id)
+    form = ProduitAfriqueForm(obj=produit)
+
+    # Préparer les choix dynamiques
+    vendeurs = Vendeur.query.all()
+    form.vendeur_id.choices = [(v.id, f"{v.nom} {v.prenom}") for v in vendeurs]
+    boutiques = Boutique.query.all()
+    form.boutique_id.choices = [(b.id, b.nom) for b in boutiques]
+
+    if form.validate_on_submit():
+        produit.nom = form.nom.data
+        produit.description = form.description.data
+        produit.prix = form.prix.data
+        produit.categorie = form.categorie.data
+        produit.stock = form.stock.data
+        produit.vendeur_id = form.vendeur_id.data
+        produit.boutique_id = form.boutique_id.data
+        produit.pays_origine = form.pays_origine.data
+
+        # Mise à jour des images
+        images = request.files.getlist('images')
+        if images and images[0].filename != '':
+            image_filenames = []
+            for image in images:
+                filename = secure_filename(image.filename)
+                image_path = os.path.join(UPLOAD_FOLDER_IMAGES, filename)
+                image.save(image_path)
+                image_filenames.append(filename)
+            produit.image = ",".join(image_filenames)
+
+        db.session.commit()
+        flash("✅ Produit modifié avec succès !", "success")
+        return redirect(url_for('web_routes.voir_afrique'))
+
+    return render_template('edit_afrique.html', form=form, produit=produit)
+
 
 @web_routes.route('/admin/produit_afrique/supprimer/<int:id>', methods=['POST'])
 def supprimer_produit_afrique(id):
-    # logique de suppression
-    pass
+    produit = ProduitAfrique.query.get_or_404(id)
 
-@web_routes.route('/admin/produit_alibaba/modifier/<int:id>', methods=['GET', 'POST'])
+    try:
+        db.session.delete(produit)
+        db.session.commit()
+        flash("🗑️ Produit supprimé avec succès.", "success")
+    except:
+        db.session.rollback()
+        flash("❌ Une erreur est survenue lors de la suppression.", "danger")
+
+    return redirect(url_for('web_routes.voir_afrique'))
+
+
+@web_routes.route('/admin/produit_alibaba/modifier/<int:id>', methods=['GET', 'POST']) 
 def modifier_produit_alibaba(id):
-    # logique de modification
-    pass
+    produit = ProduitAlibaba.query.get_or_404(id)
+    form = ProduitAlibabaForm(obj=produit)
+
+    if form.validate_on_submit():
+        produit.nom = form.nom.data
+        produit.description = form.description.data
+        produit.prix_estime = form.prix_estime.data
+        produit.min_commande = form.min_commande.data
+        produit.frais_livraison_estime = form.frais_livraison_estime.data
+        produit.vendeur = form.vendeur.data
+        produit.note = form.note.data
+        produit.couleur = form.couleur.data
+
+        # Mise à jour des images si nouveau fichier
+        images = request.files.getlist('images')
+        if images and images[0].filename != '':
+            image_filenames = []
+            for image in images:
+                filename = secure_filename(image.filename)
+                image_path = os.path.join(UPLOAD_FOLDER_IMAGES, filename)
+                image.save(image_path)
+                image_filenames.append(filename)
+            produit.image = ",".join(image_filenames)
+
+        db.session.commit()
+        flash("✅ Produit Alibaba modifié avec succès !", "success")
+        return redirect(url_for('web_routes.voir_alibaba'))
+
+    return render_template('edit_alibaba.html', form=form, produit=produit)
+
 
 @web_routes.route('/admin/produit_alibaba/supprimer/<int:id>', methods=['POST'])
 def supprimer_produit_alibaba(id):
-    # logique de suppression
-    pass
+    produit = ProduitAlibaba.query.get_or_404(id)
+
+    try:
+        db.session.delete(produit)
+        db.session.commit()
+        flash("🗑️ Produit Alibaba supprimé avec succès.", "success")
+    except:
+        db.session.rollback()
+        flash("❌ Une erreur est survenue lors de la suppression.", "danger")
+
+    return redirect(url_for('web_routes.voir_alibaba'))
+
 
 @web_routes.route('/admin/vendeur/modifier/<int:id>', methods=['GET', 'POST'])
 def modifier_vendeur(id):
-    # Logique de modification
-    pass
+    vendeur = Vendeur.query.get_or_404(id)
+    form = VendeurForm(obj=vendeur)
+
+    if form.validate_on_submit():
+        vendeur.nom = form.nom.data
+        vendeur.prenom = form.prenom.data
+        vendeur.email = form.email.data
+        vendeur.tel = form.tel.data
+        vendeur.adresse = form.adresse.data
+        vendeur.ville = form.ville.data
+        vendeur.pays = form.pays.data
+
+        # Optionnel : mise à jour mot de passe (uniquement si changé)
+        if form.mot_de_passe.data:
+            vendeur.mot_de_passe = form.mot_de_passe.data  # à hasher si non déjà fait dans le model
+
+        db.session.commit()
+        flash("✅ Vendeur modifié avec succès !", "success")
+        return redirect(url_for('web_routes.voir_vendeur'))
+
+    return render_template('edit_vendeur.html', form=form, vendeur=vendeur)
+
 
 @web_routes.route('/admin/vendeur/supprimer/<int:id>', methods=['POST'])
 def supprimer_vendeur(id):
-    # Logique de suppression
-    pass
+    vendeur = Vendeur.query.get_or_404(id)
+
+    try:
+        db.session.delete(vendeur)
+        db.session.commit()
+        flash("🗑️ Vendeur supprimé avec succès.", "success")
+    except:
+        db.session.rollback()
+        flash("❌ Une erreur est survenue lors de la suppression.", "danger")
+
+    return redirect(url_for('web_routes.voir_vendeur'))
+
 
 @web_routes.route('/vendeur/reset_mdp', methods=['POST'])
 def demande_reset_mdp():
