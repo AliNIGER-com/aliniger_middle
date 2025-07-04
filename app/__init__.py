@@ -7,7 +7,7 @@ from .config import Config
 
 # Initialisation des extensions
 db = SQLAlchemy()
-migrate = Migrate()  # <-- Ajouté ici
+migrate = Migrate()
 login_manager = LoginManager()
 
 # Import du modèle ici uniquement pour user_loader
@@ -17,14 +17,17 @@ def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
 
-    # Initialisation des extensions avec l'app
+    # ✅ Limite d'upload (50 Mo)
+    app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024  # 50 MB
+
+    # Initialisation des extensions
     db.init_app(app)
-    migrate.init_app(app, db)  # <-- Ajouté ici
+    migrate.init_app(app, db)
     CORS(app)
     login_manager.init_app(app)
 
     # Configuration de Flask-Login
-    login_manager.login_view = 'web_routes.login_vendeur'  # Utilise le nom Blueprint.route
+    login_manager.login_view = 'web_routes.login_vendeur'
 
     @login_manager.user_loader
     def load_user(user_id):

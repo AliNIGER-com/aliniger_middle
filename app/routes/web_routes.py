@@ -575,3 +575,8 @@ def mettre_a_jour_statut_commande(id):
     db.session.commit()
     flash(f"Statut de la commande #{commande.id} mis à jour en '{nouveau_statut}'.", "success")
     return redirect(url_for('web_routes.voir_commandes'))
+
+# Gestion de l'erreur 413 spécifique à ce blueprint
+@web_routes.app_errorhandler(413)
+def handle_file_too_large(error):
+    return render_template('errors/413.html'), 413
