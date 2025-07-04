@@ -4,8 +4,6 @@
     <meta charset="UTF-8" />
     <title>Dashboard Admin - AliNiger</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-
-    <!-- Bootstrap CSS (via CDN) -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
 
     <style>
@@ -27,7 +25,7 @@
         .logo {
             font-weight: 700;
             font-size: 1.75rem;
-            color: #2e7d32; /* Vert AliNiger */
+            color: #2e7d32;
             letter-spacing: 1.5px;
         }
 
@@ -36,6 +34,7 @@
             color: #2e7d32;
             transition: color 0.3s ease;
         }
+
         .navbar-nav .nav-link:hover,
         .navbar-nav .nav-link.active {
             color: #145214;
@@ -62,6 +61,7 @@
             background-color: #fff;
             border: none;
         }
+
         .card:hover {
             transform: translateY(-8px);
             box-shadow: 0 12px 30px rgb(0 0 0 / 0.15);
@@ -97,6 +97,7 @@
             background-color: #2e7d32;
             border: none;
         }
+
         .btn-success:hover {
             background-color: #145214;
             box-shadow: 0 6px 20px rgb(20 82 20 / 0.5);
@@ -108,6 +109,7 @@
             color: #fff;
             box-shadow: 0 4px 12px rgb(249 168 37 / 0.3);
         }
+
         .btn-warning:hover {
             background-color: #c17900;
             box-shadow: 0 6px 20px rgb(193 121 0 / 0.5);
@@ -119,6 +121,7 @@
             color: #fff;
             box-shadow: 0 4px 12px rgb(62 62 62 / 0.3);
         }
+
         .btn-dark:hover {
             background-color: #1a1a1a;
             box-shadow: 0 6px 20px rgb(26 26 26 / 0.5);
@@ -129,6 +132,7 @@
             border: none;
             box-shadow: 0 4px 12px rgb(21 101 192 / 0.3);
         }
+
         .btn-primary:hover {
             background-color: #0d3c7f;
             box-shadow: 0 6px 20px rgb(13 60 127 / 0.5);
@@ -156,7 +160,13 @@
                     <li class="nav-item"><a class="nav-link" href="{{ url_for('web_routes.dashboard') }}">Dashboard</a></li>
                     <li class="nav-item"><a class="nav-link" href="{{ url_for('web_routes.statistiques') }}">Statistiques</a></li>
                     <li class="nav-item"><a class="nav-link" href="{{ url_for('web_routes.voir_commandes') }}">Commande</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{{ url_for('web_routes.voir_boutique') }}">Boutique</a></li>
+
+                    {% if vendeur %}
+                        <li class="nav-item"><a class="nav-link" href="{{ url_for('web_routes.voir_boutique', vendeur_id=vendeur.id) }}">Boutique</a></li>
+                    {% else %}
+                        <li class="nav-item"><a class="nav-link disabled text-muted" href="#">Boutique</a></li>
+                    {% endif %}
+
                     <li class="nav-item"><a class="nav-link" href="{{ url_for('web_routes.voir_afrique') }}">Produits Afrique</a></li>
                     <li class="nav-item"><a class="nav-link" href="{{ url_for('web_routes.voir_alibaba') }}">Produits Alibaba</a></li>
                     <li class="nav-item"><a class="nav-link" href="{{ url_for('web_routes.voir_vendeur') }}">Vendeur</a></li>
@@ -212,7 +222,6 @@
         </div>
     </div>
 
-    <!-- Bootstrap JS (via CDN) -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

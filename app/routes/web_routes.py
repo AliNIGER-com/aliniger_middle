@@ -22,7 +22,8 @@ os.makedirs(UPLOAD_FOLDER_VIDEOS, exist_ok=True)
 # Dashboard
 @web_routes.route('/')
 def dashboard():
-    return render_template('index.html')
+    vendeur = Vendeur.query.first()  # Ou vendeur connecté
+    return render_template('index.html', vendeur=vendeur)
 
 from flask import render_template
 from datetime import datetime, timedelta
