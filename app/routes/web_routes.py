@@ -128,14 +128,12 @@ def statistiques():
 
 
 # === visionner liste boutique ===
-@web_routes.route('/boutique')
-def voir_boutique():
+@web_routes.route('/voir-boutique/<int:vendeur_id>')
+def voir_boutique(vendeur_id):
+    vendeur = Vendeur.query.get_or_404(vendeur_id)
     boutiques = Boutique.query.all()
-
-    return render_template(
-        'boutique.html',
-        boutiques=boutiques
-    )
+    produits = ProduitAlibaba.query.filter_by(vendeur=vendeur.nom).all()
+    return render_template('voir_boutique.html', vendeur=vendeur, produits=produits, boutiques=boutiques)
 
 # === visionner liste boutique ===
 @web_routes.route('/afrique')
@@ -299,50 +297,61 @@ def ajouter_vendeur():
 @web_routes.route('/vendeur/login', methods=['GET', 'POST'])
 def login_vendeur():
     if request.method == 'POST':
-        email = request.form['email']
-        mot_de_passe = request.form['mot_de_passe']
+        email = request.form.get('email')
+        mot_de_passe = request.form.get('mot_de_passe')
         vendeur = Vendeur.query.filter_by(email=email).first()
+        
         if vendeur and check_password_hash(vendeur.mot_de_passe, mot_de_passe):
             login_user(vendeur)
-            return redirect(url_for('dashboard_vendeur'))
+            flash("Connexion réussie", "success")
+            return redirect(url_for('web_routes.dashboard_vendeur'))
         else:
             flash('Identifiants invalides', 'danger')
+    
     return render_template('login_vendeur.html')
+
 
 @web_routes.route('/vendeur/dashboard')
 @login_required
 def dashboard_vendeur():
+    if not current_user.is_authenticated:
+        return redirect(url_for('web_routes.login_vendeur'))
+    
     return render_template('dashboard_vendeur.html', vendeur=current_user)
+
 
 @web_routes.route('/vendeur/logout')
 @login_required
 def logout_vendeur():
     logout_user()
     flash("Déconnexion réussie.", "success")
-    return redirect(url_for('login_vendeur'))
+    return redirect(url_for('web_routes.login_vendeur'))
+
 
 @web_routes.route('/vendeur/promo', methods=['POST'])
 @login_required
 def lancer_promo():
     produit_id = request.form.get('produit_id')
-    nouvelle_remise = request.form.get('remise')  # exemple : 20 pour -20%
+    nouvelle_remise = request.form.get('remise')
 
     produit = ProduitAfrique.query.filter_by(id=produit_id, vendeur_id=current_user.id).first()
 
     if produit:
         try:
             nouvelle_remise = float(nouvelle_remise)
-            # Appliquer la remise sur le prix actuel
-            ancien_prix = produit.prix
-            produit.prix = round(produit.prix * (1 - nouvelle_remise / 100), 2)
-            db.session.commit()
-            flash(f"✅ Promotion appliquée : {ancien_prix} → {produit.prix} FCFA", "success")
-        except:
-            flash("Erreur dans le format de la remise.", "danger")
+            if 0 <= nouvelle_remise <= 100:
+                ancien_prix = produit.prix
+                produit.prix = round(produit.prix * (1 - nouvelle_remise / 100), 2)
+                db.session.commit()
+                flash(f"✅ Promotion appliquée : {ancien_prix} FCFA → {produit.prix} FCFA", "success")
+            else:
+                flash("La remise doit être entre 0 et 100%.", "warning")
+        except ValueError:
+            flash("Erreur : Veuillez entrer un pourcentage valide.", "danger")
     else:
         flash("Produit non trouvé ou non autorisé.", "danger")
 
-    return redirect(url_for('dashboard_vendeur'))
+    return redirect(url_for('web_routes.dashboard_vendeur'))
 
 @web_routes.route('/admin/boutique/modifier_inline/<int:id>', methods=['POST'])
 def modifier_boutique_inline(id):

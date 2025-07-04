@@ -8,7 +8,7 @@
 </head>
 <body>
   <div class="container mt-5">
-    <a href="{{ url_for('web_routes.dashboard') }}" class="btn btn-outline-secondary mb-3">← Retour</a>
+    <a href="{{ url_for('web_routes.ajouter_vendeur') }}" class="btn btn-outline-secondary mb-3">Vendeur</a>
     <h3 class="text-success text-center mb-4">Ajouter un Vendeur</h3>
 
     {% with messages = get_flashed_messages(with_categories=true) %}
