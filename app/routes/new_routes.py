@@ -8,7 +8,7 @@ import os
 import uuid
 
 from app import db
-from models import (
+from app.models import (
     Boutique, ProduitAfrique, BoutiqueVisit, BoutiqueView,
     Commande, DetailCommande, CommandeReview,
     Paiement, Notification, User
