@@ -10,11 +10,24 @@ auth_routes = Blueprint('auth_routes', __name__)
 @auth_routes.route('/api/users', methods=['POST'])
 def register_user():
     data = request.get_json()
-    mot_de_passe_hash = generate_password_hash(data['mot_de_passe'])
-    new_user = User(**{k: data[k] for k in data if k != 'mot_de_passe'}, mot_de_passe=mot_de_passe_hash)
+
+    # Vérifie si le champ 'password' est présent
+    if 'password' not in data:
+        return jsonify({'error': 'Le mot de passe est requis.'}), 400
+
+    # Hash le mot de passe
+    mot_de_passe_hash = generate_password_hash(data['password'])
+
+    # Crée un nouvel utilisateur en remplaçant 'password' par 'mot_de_passe'
+    user_data = {k: data[k] for k in data if k != 'password'}
+    user_data['mot_de_passe'] = mot_de_passe_hash
+
+    new_user = User(**user_data)
     db.session.add(new_user)
     db.session.commit()
+
     return jsonify({'message': 'Utilisateur enregistré'}), 201
+
 
 @auth_routes.route('/api/login', methods=['POST'])
 def login_user():
