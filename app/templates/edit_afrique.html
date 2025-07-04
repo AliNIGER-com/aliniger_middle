@@ -1,30 +1,96 @@
-{% extends "base.html" %}
-{% block content %}
-<div class="container mt-5">
-  <h2 class="mb-4">✏️ Modifier Produit Afrique</h2>
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Modifier Produit Afrique | AliNiger</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <style>
+    body {
+      background-color: #f8f9fa;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    h2 {
+      margin-top: 30px;
+      font-weight: bold;
+      color: #dc3545;
+    }
+    form {
+      background: white;
+      padding: 25px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      max-width: 650px;
+      margin: auto;
+    }
+    .btn-group {
+      margin-top: 20px;
+      display: flex;
+      justify-content: space-between;
+    }
+  </style>
+</head>
+<body>
+  <div class="container my-5">
+    <h2 class="text-danger mb-4">✏️ Modifier Produit Afrique</h2>
+    <form method="POST" enctype="multipart/form-data">
+      {{ form.hidden_tag() }}
 
-  <form method="POST" enctype="multipart/form-data">
-    {{ form.hidden_tag() }}
+      <div class="mb-3">
+        {{ form.nom.label(class="form-label") }}
+        {{ form.nom(class="form-control") }}
+      </div>
 
-    <div class="mb-3">{{ form.nom.label }} {{ form.nom(class="form-control") }}</div>
-    <div class="mb-3">{{ form.description.label }} {{ form.description(class="form-control") }}</div>
-    <div class="mb-3">{{ form.prix.label }} {{ form.prix(class="form-control") }}</div>
-    <div class="mb-3">{{ form.pays_origine.label }} {{ form.pays_origine(class="form-control") }}</div>
-    <div class="mb-3">{{ form.categorie.label }} {{ form.categorie(class="form-control") }}</div>
-    <div class="mb-3">{{ form.stock.label }} {{ form.stock(class="form-control") }}</div>
-    <div class="mb-3">{{ form.vendeur_id.label }} {{ form.vendeur_id(class="form-select") }}</div>
-    <div class="mb-3">{{ form.boutique_id.label }} {{ form.boutique_id(class="form-select") }}</div>
+      <div class="mb-3">
+        {{ form.description.label(class="form-label") }}
+        {{ form.description(class="form-control") }}
+      </div>
 
-    <div class="mb-3">
-      <label for="images">📸 Nouvelles images (facultatif)</label>
-      <input type="file" name="images" id="images" class="form-control" multiple>
-      {% if produit.image %}
-        <small class="text-muted">Images actuelles : {{ produit.image }}</small>
-      {% endif %}
-    </div>
+      <div class="mb-3">
+        {{ form.prix.label(class="form-label") }}
+        {{ form.prix(class="form-control") }}
+      </div>
 
-    <button class="btn btn-primary" type="submit">💾 Enregistrer</button>
-    <a class="btn btn-secondary" href="{{ url_for('web_routes.voir_afrique') }}">↩️ Retour</a>
-  </form>
-</div>
-{% endblock %}
+      <div class="mb-3">
+        {{ form.pays_origine.label(class="form-label") }}
+        {{ form.pays_origine(class="form-control") }}
+      </div>
+
+      <div class="mb-3">
+        {{ form.categorie.label(class="form-label") }}
+        {{ form.categorie(class="form-control") }}
+      </div>
+
+      <div class="mb-3">
+        {{ form.stock.label(class="form-label") }}
+        {{ form.stock(class="form-control") }}
+      </div>
+
+      <div class="mb-3">
+        {{ form.vendeur_id.label(class="form-label") }}
+        {{ form.vendeur_id(class="form-select") }}
+      </div>
+
+      <div class="mb-3">
+        {{ form.boutique_id.label(class="form-label") }}
+        {{ form.boutique_id(class="form-select") }}
+      </div>
+
+      <div class="mb-3">
+        <label for="images" class="form-label">📸 Nouvelles images (facultatif)</label>
+        <input type="file" name="images" id="images" class="form-control" multiple>
+        {% if produit.image %}
+          <small class="text-muted">Images actuelles : {{ produit.image }}</small>
+        {% endif %}
+      </div>
+
+      <div class="btn-group">
+        <button class="btn btn-primary" type="submit">💾 Enregistrer</button>
+        <a class="btn btn-secondary" href="{{ url_for('web_routes.voir_afrique') }}">↩️ Retour</a>
+      </div>
+    </form>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

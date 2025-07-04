@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Vendeurs | AliNiger</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
-
   <style>
     body {
       background-color: #f8f9fa;
@@ -25,6 +24,10 @@
     }
     .table-hover tbody tr:hover {
       background-color: #fdecea;
+    }
+    td[contenteditable="true"] {
+      background-color: #fff9e6;
+      cursor: text;
     }
   </style>
 </head>
@@ -53,16 +56,15 @@
         </thead>
         <tbody>
           {% for v in vendeurs %}
-            <tr>
-              <td class="fw-semibold">{{ v.nom }}</td>
-              <td>{{ v.prenom }}</td>
-              <td>{{ v.email }}</td>
-              <td>{{ v.tel }}</td>
-              <td>{{ v.adresse }}</td>
-              <td>{{ v.ville }}</td>
-              <td>{{ v.pays }}</td>
+            <tr data-id="{{ v.id }}">
+              <td contenteditable="true" data-field="nom" class="fw-semibold">{{ v.nom }}</td>
+              <td contenteditable="true" data-field="prenom">{{ v.prenom }}</td>
+              <td contenteditable="true" data-field="email">{{ v.email }}</td>
+              <td contenteditable="true" data-field="tel">{{ v.tel }}</td>
+              <td contenteditable="true" data-field="adresse">{{ v.adresse }}</td>
+              <td contenteditable="true" data-field="ville">{{ v.ville }}</td>
+              <td contenteditable="true" data-field="pays">{{ v.pays }}</td>
               <td class="text-center">
-                <a href="{{ url_for('web_routes.modifier_vendeur', id=v.id) }}" class="btn btn-sm btn-outline-primary btn-action">✏️ Modifier</a>
                 <form action="{{ url_for('web_routes.supprimer_vendeur', id=v.id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Confirmer la suppression du vendeur ?')">
                   <button type="submit" class="btn btn-sm btn-outline-danger btn-action">🗑 Supprimer</button>
                 </form>
@@ -78,6 +80,56 @@
     </div>
   {% endif %}
 </div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    // Sélectionne toutes les cellules éditables
+    const editableCells = document.querySelectorAll('td[contenteditable="true"]');
+
+    editableCells.forEach(cell => {
+      cell.addEventListener('blur', async (event) => {
+        const cell = event.target;
+        const newValue = cell.textContent.trim();
+        const field = cell.getAttribute('data-field');
+        const row = cell.closest('tr');
+        const id = row.getAttribute('data-id');
+
+        // Envoi de la mise à jour au serveur via fetch POST (AJAX)
+        try {
+          const response = await fetch(`/admin/vendeur/modifier_inline/${id}`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': getCookie('csrf_token')  // si tu utilises CSRF protection Flask-WTF
+            },
+            body: JSON.stringify({
+              field: field,
+              value: newValue
+            })
+          });
+          if (!response.ok) {
+            throw new Error('Erreur serveur');
+          }
+          const data = await response.json();
+          if (data.success) {
+            console.log(`Vendeur #${id} mis à jour: ${field}=${newValue}`);
+          } else {
+            alert('Erreur lors de la mise à jour : ' + (data.message || 'Erreur inconnue'));
+          }
+        } catch (error) {
+          alert('Erreur réseau ou serveur : ' + error.message);
+        }
+      });
+    });
+  });
+
+  // Fonction pour récupérer le cookie CSRF si utilisé
+  function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+  }
+</script>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>

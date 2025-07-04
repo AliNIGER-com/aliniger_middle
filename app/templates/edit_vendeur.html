@@ -1,54 +1,72 @@
-{% extends "base.html" %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Modifier Vendeur | AliNiger</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+</head>
+<body class="bg-light">
 
-{% block content %}
-<div class="container mt-4">
-    <h2 class="mb-4">📝 Modifier Vendeur</h2>
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
 
-    <form method="POST">
+      <h2 class="mb-4 text-danger">✏️ Modifier un vendeur</h2>
+
+      <form method="POST">
         {{ form.hidden_tag() }}
 
-        <div class="form-group mb-3">
-            {{ form.nom.label(class="form-label") }}
-            {{ form.nom(class="form-control") }}
+        <div class="mb-3">
+          {{ form.nom.label(class="form-label") }}
+          {{ form.nom(class="form-control", placeholder="Nom") }}
         </div>
 
-        <div class="form-group mb-3">
-            {{ form.prenom.label(class="form-label") }}
-            {{ form.prenom(class="form-control") }}
+        <div class="mb-3">
+          {{ form.prenom.label(class="form-label") }}
+          {{ form.prenom(class="form-control", placeholder="Prénom") }}
         </div>
 
-        <div class="form-group mb-3">
-            {{ form.email.label(class="form-label") }}
-            {{ form.email(class="form-control") }}
+        <div class="mb-3">
+          {{ form.email.label(class="form-label") }}
+          {{ form.email(class="form-control", placeholder="Email") }}
         </div>
 
-        <div class="form-group mb-3">
-            {{ form.tel.label(class="form-label") }}
-            {{ form.tel(class="form-control") }}
+        <div class="mb-3">
+          {{ form.tel.label(class="form-label") }}
+          {{ form.tel(class="form-control", placeholder="Téléphone") }}
         </div>
 
-        <div class="form-group mb-3">
-            {{ form.adresse.label(class="form-label") }}
-            {{ form.adresse(class="form-control") }}
+        <div class="mb-3">
+          {{ form.adresse.label(class="form-label") }}
+          {{ form.adresse(class="form-control", placeholder="Adresse") }}
         </div>
 
-        <div class="form-group mb-3">
-            {{ form.ville.label(class="form-label") }}
-            {{ form.ville(class="form-control") }}
+        <div class="mb-3">
+          {{ form.ville.label(class="form-label") }}
+          {{ form.ville(class="form-control", placeholder="Ville") }}
         </div>
 
-        <div class="form-group mb-3">
-            {{ form.pays.label(class="form-label") }}
-            {{ form.pays(class="form-control") }}
+        <div class="mb-3">
+          {{ form.pays.label(class="form-label") }}
+          {{ form.pays(class="form-control", placeholder="Pays") }}
         </div>
 
-        <div class="form-group mb-3">
-            {{ form.mot_de_passe.label(class="form-label") }}
-            {{ form.mot_de_passe(class="form-control", placeholder="Laisse vide pour ne pas changer") }}
+        <div class="mb-3">
+          {{ form.mot_de_passe.label(class="form-label") }}
+          {{ form.mot_de_passe(class="form-control", placeholder="Laisser vide si inchangé") }}
+          <small class="text-muted">Laisser vide si tu ne veux pas modifier le mot de passe</small>
         </div>
 
-        <button type="submit" class="btn btn-primary">💾 Enregistrer les modifications</button>
-        <a href="{{ url_for('web_routes.voir_vendeur') }}" class="btn btn-secondary">↩️ Retour</a>
-    </form>
+        <div class="d-flex justify-content-between">
+          <a href="{{ url_for('web_routes.voir_vendeur') }}" class="btn btn-secondary">← Retour</a>
+          {{ form.submit(class="btn btn-success") }}
+        </div>
+      </form>
+
+    </div>
+  </div>
 </div>
-{% endblock %}
+
+</body>
+</html>

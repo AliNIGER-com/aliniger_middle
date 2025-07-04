@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!DOCTYPE html> 
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
@@ -33,6 +33,10 @@
     .table-hover tbody tr:hover {
       background-color: #fff3cd;
     }
+    td[contenteditable="true"] {
+      background-color: #fff9e6;
+      cursor: text;
+    }
   </style>
 </head>
 <body>
@@ -59,19 +63,19 @@
         </thead>
         <tbody>
           {% for p in produits_alibaba %}
-            <tr>
-              <td class="fw-semibold">{{ p.nom }}</td>
+            <tr data-id="{{ p.id }}">
+              <td contenteditable="true" data-field="nom" class="fw-semibold">{{ p.nom }}</td>
               <td>
                 {% for img in p.image.split(',') if img %}
                   <img src="{{ url_for('static', filename='uploads/images/' ~ img) }}" alt="Image produit" />
                 {% endfor %}
+                <small><em>Modifier les images inline n’est pas supporté.</em></small>
               </td>
-              <td>{{ p.prix_estime }} $</td>
-              <td><span class="badge badge-categorie">{{ p.categorie }}</span></td>
-              <td>{{ p.couleur }}</td>
-              <td>{{ p.min_commande }}</td>
+              <td contenteditable="true" data-field="prix_estime">{{ p.prix_estime }}</td>
+              <td contenteditable="true" data-field="categorie"><span class="badge badge-categorie">{{ p.categorie }}</span></td>
+              <td contenteditable="true" data-field="couleur">{{ p.couleur }}</td>
+              <td contenteditable="true" data-field="min_commande">{{ p.min_commande }}</td>
               <td class="text-center">
-                <a href="{{ url_for('web_routes.modifier_produit_alibaba', id=p.id) }}" class="btn btn-sm btn-outline-primary btn-action">✏️ Modifier</a>
                 <form action="{{ url_for('web_routes.supprimer_produit_alibaba', id=p.id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Supprimer ce produit ?')">
                   <button type="submit" class="btn btn-sm btn-outline-danger btn-action">🗑 Supprimer</button>
                 </form>
@@ -87,6 +91,51 @@
     </div>
   {% endif %}
 </div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const editableCells = document.querySelectorAll('td[contenteditable="true"]');
+
+    editableCells.forEach(cell => {
+      cell.addEventListener('blur', async (event) => {
+        const cell = event.target;
+        const newValue = cell.textContent.trim();
+        const field = cell.getAttribute('data-field');
+        const row = cell.closest('tr');
+        const id = row.getAttribute('data-id');
+
+        try {
+          const response = await fetch(`/admin/produit_alibaba/modifier_inline/${id}`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': getCookie('csrf_token')  // adapter selon ton système CSRF
+            },
+            body: JSON.stringify({
+              field: field,
+              value: newValue
+            })
+          });
+          if (!response.ok) {
+            throw new Error('Erreur serveur');
+          }
+          const data = await response.json();
+          if (!data.success) {
+            alert('Erreur mise à jour : ' + (data.message || 'Erreur inconnue'));
+          }
+        } catch (error) {
+          alert('Erreur réseau ou serveur : ' + error.message);
+        }
+      });
+    });
+  });
+
+  function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+  }
+</script>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>

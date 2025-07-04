@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash
+from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify
 from werkzeug.utils import secure_filename
 from app.models import db, ProduitAfrique, ProduitAlibaba, Boutique
 from forms import ProduitAfriqueForm, ProduitAlibabaForm, BoutiqueForm, VendeurForm
@@ -342,50 +342,30 @@ def lancer_promo():
 
     return redirect(url_for('dashboard_vendeur'))
 
-@web_routes.route('/admin/boutique/modifier/<int:id>', methods=['GET', 'POST'])
-def modifier_boutique(id):
+@web_routes.route('/admin/boutique/modifier_inline/<int:id>', methods=['POST'])
+def modifier_boutique_inline(id):
     boutique = Boutique.query.get_or_404(id)
-    form = BoutiqueForm(obj=boutique)  # Pré-remplir le formulaire
+    data = request.get_json()
+    field = data.get('field')
+    value = data.get('value')
 
-    vendeurs = Vendeur.query.all()
-    form.vendeur_id.choices = [(v.id, f"{v.nom} {v.prenom}") for v in vendeurs]
+    champs_valides = ['nom', 'note', 'localisation', 'vendeur_id']
 
-    if form.validate_on_submit():
-        # Mise à jour des champs texte
-        boutique.nom = form.nom.data
-        boutique.description = form.description.data
-        boutique.localisation = form.localisation.data
-        boutique.note = form.note.data
-        boutique.vendeur_id = form.vendeur_id.data
-        boutique.pays = form.pays.data
+    if field not in champs_valides:
+        return jsonify({'success': False, 'message': 'Champ invalide.'}), 400
 
-        # Mise à jour des images si nouvelles fournies
-        images = request.files.getlist('images')
-        if images and images[0].filename != '':
-            image_filenames = []
-            for image in images:
-                filename = secure_filename(image.filename)
-                image_path = os.path.join(UPLOAD_FOLDER_IMAGES, filename)
-                image.save(image_path)
-                image_filenames.append(filename)
-            boutique.image = ",".join(image_filenames)
+    try:
+        if field == 'note':
+            value = float(value)
+        elif field == 'vendeur_id':
+            value = int(value)
 
-        # Mise à jour des vidéos si nouvelles fournies
-        videos = request.files.getlist('videos')
-        if videos and videos[0].filename != '':
-            video_filenames = []
-            for video in videos:
-                filename = secure_filename(video.filename)
-                video_path = os.path.join(UPLOAD_FOLDER_VIDEOS, filename)
-                video.save(video_path)
-                video_filenames.append(filename)
-            boutique.video = ",".join(video_filenames)
-
+        setattr(boutique, field, value)
         db.session.commit()
-        flash("✅ Boutique mise à jour avec succès !", "success")
-        return redirect(url_for('web_routes.voir_boutique'))
-
-    return render_template('edit_boutique.html', form=form, boutique=boutique)
+        return jsonify({'success': True})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'message': str(e)}), 500
 
 
 @web_routes.route('/admin/boutique/supprimer/<int:id>', methods=['POST'])
@@ -402,43 +382,32 @@ def supprimer_boutique(id):
 
     return redirect(url_for('web_routes.voir_boutique'))
 
-@web_routes.route('/admin/produit_afrique/modifier/<int:id>', methods=['GET', 'POST'])
-def modifier_produit_afrique(id):
+@web_routes.route('/admin/produit_afrique/modifier_inline/<int:id>', methods=['POST'])
+def modifier_produit_afrique_inline(id):
     produit = ProduitAfrique.query.get_or_404(id)
-    form = ProduitAfriqueForm(obj=produit)
+    data = request.get_json()
+    field = data.get('field')
+    value = data.get('value')
 
-    # Préparer les choix dynamiques
-    vendeurs = Vendeur.query.all()
-    form.vendeur_id.choices = [(v.id, f"{v.nom} {v.prenom}") for v in vendeurs]
-    boutiques = Boutique.query.all()
-    form.boutique_id.choices = [(b.id, b.nom) for b in boutiques]
+    champs_valides = ['nom', 'prix', 'categorie', 'stock', 'vendeur_id']
 
-    if form.validate_on_submit():
-        produit.nom = form.nom.data
-        produit.description = form.description.data
-        produit.prix = form.prix.data
-        produit.categorie = form.categorie.data
-        produit.stock = form.stock.data
-        produit.vendeur_id = form.vendeur_id.data
-        produit.boutique_id = form.boutique_id.data
-        produit.pays_origine = form.pays_origine.data
+    if field not in champs_valides:
+        return jsonify({'success': False, 'message': 'Champ invalide.'}), 400
 
-        # Mise à jour des images
-        images = request.files.getlist('images')
-        if images and images[0].filename != '':
-            image_filenames = []
-            for image in images:
-                filename = secure_filename(image.filename)
-                image_path = os.path.join(UPLOAD_FOLDER_IMAGES, filename)
-                image.save(image_path)
-                image_filenames.append(filename)
-            produit.image = ",".join(image_filenames)
+    try:
+        if field == 'prix':
+            value = float(value)
+        elif field == 'stock':
+            value = int(value)
+        elif field == 'vendeur_id':
+            value = int(value)
 
+        setattr(produit, field, value)
         db.session.commit()
-        flash("✅ Produit modifié avec succès !", "success")
-        return redirect(url_for('web_routes.voir_afrique'))
-
-    return render_template('edit_afrique.html', form=form, produit=produit)
+        return jsonify({'success': True})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'message': str(e)}), 500
 
 
 @web_routes.route('/admin/produit_afrique/supprimer/<int:id>', methods=['POST'])
@@ -456,37 +425,32 @@ def supprimer_produit_afrique(id):
     return redirect(url_for('web_routes.voir_afrique'))
 
 
-@web_routes.route('/admin/produit_alibaba/modifier/<int:id>', methods=['GET', 'POST']) 
-def modifier_produit_alibaba(id):
+@web_routes.route('/admin/produit_alibaba/modifier_inline/<int:id>', methods=['POST'])
+def modifier_produit_alibaba_inline(id):
     produit = ProduitAlibaba.query.get_or_404(id)
-    form = ProduitAlibabaForm(obj=produit)
+    data = request.get_json()
 
-    if form.validate_on_submit():
-        produit.nom = form.nom.data
-        produit.description = form.description.data
-        produit.prix_estime = form.prix_estime.data
-        produit.min_commande = form.min_commande.data
-        produit.frais_livraison_estime = form.frais_livraison_estime.data
-        produit.vendeur = form.vendeur.data
-        produit.note = form.note.data
-        produit.couleur = form.couleur.data
+    field = data.get('field')
+    value = data.get('value')
 
-        # Mise à jour des images si nouveau fichier
-        images = request.files.getlist('images')
-        if images and images[0].filename != '':
-            image_filenames = []
-            for image in images:
-                filename = secure_filename(image.filename)
-                image_path = os.path.join(UPLOAD_FOLDER_IMAGES, filename)
-                image.save(image_path)
-                image_filenames.append(filename)
-            produit.image = ",".join(image_filenames)
+    champs_valides = ['nom', 'prix_estime', 'categorie', 'couleur', 'min_commande']
 
+    if field not in champs_valides:
+        return jsonify({'success': False, 'message': 'Champ invalide.'}), 400
+
+    try:
+        # Casting si nécessaire, par exemple min_commande en int, prix_estime en float
+        if field == 'min_commande':
+            value = int(value)
+        elif field == 'prix_estime':
+            value = float(value)
+
+        setattr(produit, field, value)
         db.session.commit()
-        flash("✅ Produit Alibaba modifié avec succès !", "success")
-        return redirect(url_for('web_routes.voir_alibaba'))
-
-    return render_template('edit_alibaba.html', form=form, produit=produit)
+        return jsonify({'success': True})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'message': str(e)}), 500
 
 
 @web_routes.route('/admin/produit_alibaba/supprimer/<int:id>', methods=['POST'])
@@ -503,30 +467,29 @@ def supprimer_produit_alibaba(id):
 
     return redirect(url_for('web_routes.voir_alibaba'))
 
+from flask import request, jsonify
 
-@web_routes.route('/admin/vendeur/modifier/<int:id>', methods=['GET', 'POST'])
-def modifier_vendeur(id):
+@web_routes.route('/admin/vendeur/modifier_inline/<int:id>', methods=['POST'])
+def modifier_vendeur_inline(id):
     vendeur = Vendeur.query.get_or_404(id)
-    form = VendeurForm(obj=vendeur)
+    data = request.get_json()
 
-    if form.validate_on_submit():
-        vendeur.nom = form.nom.data
-        vendeur.prenom = form.prenom.data
-        vendeur.email = form.email.data
-        vendeur.tel = form.tel.data
-        vendeur.adresse = form.adresse.data
-        vendeur.ville = form.ville.data
-        vendeur.pays = form.pays.data
+    field = data.get('field')
+    value = data.get('value')
 
-        # Optionnel : mise à jour mot de passe (uniquement si changé)
-        if form.mot_de_passe.data:
-            vendeur.mot_de_passe = form.mot_de_passe.data  # à hasher si non déjà fait dans le model
+    # Liste des champs modifiables
+    champs_valides = ['nom', 'prenom', 'email', 'tel', 'adresse', 'ville', 'pays']
 
+    if field not in champs_valides:
+        return jsonify({'success': False, 'message': 'Champ invalide.'}), 400
+
+    try:
+        setattr(vendeur, field, value)
         db.session.commit()
-        flash("✅ Vendeur modifié avec succès !", "success")
-        return redirect(url_for('web_routes.voir_vendeur'))
-
-    return render_template('edit_vendeur.html', form=form, vendeur=vendeur)
+        return jsonify({'success': True})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'message': str(e)}), 500
 
 
 @web_routes.route('/admin/vendeur/supprimer/<int:id>', methods=['POST'])
@@ -590,3 +553,25 @@ def produits_recents():
     resultats.sort(key=lambda x: x['id'], reverse=True)
 
     return jsonify(resultats[:10]), 200
+
+from app.models import Commande
+@web_routes.route('/admin/commandes', methods=['GET'])
+def voir_commandes():
+    # Requête avec jointure pour accéder à user (client) et ses attributs
+    commandes = Commande.query.order_by(Commande.date_commande.desc()).all()
+    return render_template('commandes_dashboard.html', commandes=commandes)
+
+@web_routes.route('/admin/commande/<int:id>/statut', methods=['POST'])
+def mettre_a_jour_statut_commande(id):
+    commande = Commande.query.get_or_404(id)
+    nouveau_statut = request.form.get('nouveau_statut')
+
+    statuts_valides = ['Lancé', 'En cours de lancement', 'En préparation', 'Expédié', 'Livré']
+    if nouveau_statut not in statuts_valides:
+        flash("Statut invalide.", "danger")
+        return redirect(url_for('web_routes.voir_commandes'))
+
+    commande.statut = nouveau_statut
+    db.session.commit()
+    flash(f"Statut de la commande #{commande.id} mis à jour en '{nouveau_statut}'.", "success")
+    return redirect(url_for('web_routes.voir_commandes'))

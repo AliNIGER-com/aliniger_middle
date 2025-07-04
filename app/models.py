@@ -2,6 +2,7 @@ from app import db
 from sqlalchemy import Enum
 import enum
 from datetime import datetime
+
 # --- Enums ---
 class TypeCommandeEnum(enum.Enum):
     afrique = "afrique"
@@ -140,7 +141,7 @@ class Tracking(db.Model):
     date_maj = db.Column(db.DateTime)
 
 class Vente(db.Model):
-    _tablename_ = 'ventes'
+    __tablename__ = 'ventes'
 
     id = db.Column(db.Integer, primary_key=True)
     produit_id = db.Column(db.Integer, db.ForeignKey('produits_afrique.id'), nullable=False)
@@ -156,5 +157,81 @@ class Vente(db.Model):
     vendeur = db.relationship("Vendeur", backref="ventes", lazy=True)
     boutique = db.relationship("Boutique", backref="ventes", lazy=True)
 
-    def _repr_(self):
+    def __repr__(self):
         return f"<Vente {self.id} - Produit {self.produit_id} - Vendeur {self.vendeur_id}>"
+
+# --- Suivi des vues de boutique ---
+class BoutiqueView(db.Model):
+    __tablename__ = 'boutique_views'
+    id = db.Column(db.Integer, primary_key=True)
+    boutique_id = db.Column(db.Integer, db.ForeignKey('boutiques.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
+# --- Suivi des visites de boutique ---
+class BoutiqueVisit(db.Model):
+    __tablename__ = 'boutique_visits'
+    id = db.Column(db.Integer, primary_key=True)
+    boutique_id = db.Column(db.Integer, db.ForeignKey('boutiques.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    ip_address = db.Column(db.String(100))
+
+# --- Avis sur commande ---
+class CommandeReview(db.Model):
+    __tablename__ = 'commande_reviews'
+    id = db.Column(db.Integer, primary_key=True)
+    commande_id = db.Column(db.Integer, db.ForeignKey('commandes.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    note = db.Column(db.Integer, nullable=False)
+    commentaire = db.Column(db.Text)
+    date = db.Column(db.DateTime, default=datetime.utcnow)
+
+# --- Notifications ---
+class Notification(db.Model):
+    __tablename__ = 'notifications'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    titre = db.Column(db.String(255))
+    message = db.Column(db.Text)
+    lu = db.Column(db.Boolean, default=False)
+    date = db.Column(db.DateTime, default=datetime.utcnow)
+
+# --- Paiements ---
+class Paiement(db.Model):
+    __tablename__ = 'paiements'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    commande_id = db.Column(db.Integer, db.ForeignKey('commandes.id'), nullable=False)
+    montant = db.Column(db.Float, nullable=False)
+    methode = db.Column(db.String(50))  # ex: Airtel, Moov, carte...
+    statut = db.Column(db.String(50), default='en_attente')  # ou validé, échoué
+    date = db.Column(db.DateTime, default=datetime.utcnow)
+    validated_by = db.Column(db.String(100))  # email ou ID admin
+
+# --- Liens de parrainage ---
+class ReferralLink(db.Model):
+    __tablename__ = 'referral_links'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    code = db.Column(db.String(100), unique=True, nullable=False)
+    date_creation = db.Column(db.DateTime, default=datetime.utcnow)
+    nb_utilisations = db.Column(db.Integer, default=0)
+
+# --- Partages de commande ---
+class OrderShare(db.Model):
+    __tablename__ = 'order_shares'
+    id = db.Column(db.Integer, primary_key=True)
+    commande_id = db.Column(db.Integer, db.ForeignKey('commandes.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    plateforme = db.Column(db.String(50))  # ex: WhatsApp, Facebook
+    date = db.Column(db.DateTime, default=datetime.utcnow)
+
+# --- Vues de produits ---
+class ProductView(db.Model):
+    __tablename__ = 'product_views'
+    id = db.Column(db.Integer, primary_key=True)
+    produit_id = db.Column(db.Integer, db.ForeignKey('produits_afrique.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    ip_address = db.Column(db.String(100))
