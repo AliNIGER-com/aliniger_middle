@@ -7,6 +7,7 @@ produit_routes = Blueprint('produit_routes', __name__)
 @produit_routes.route('/api/produits_afrique', methods=['GET'])
 def get_produits_afrique():
     produits = ProduitAfrique.query.all()
+    
     return jsonify([{
         "id": p.id,
         "nom": p.nom,
@@ -15,7 +16,7 @@ def get_produits_afrique():
         "image": url_for('static', filename=f'assets/produits_afrique/{p.image}', _external=True),
         "categorie": p.categorie,
         "vendeur_id": p.vendeur_id,
-        "vendeur": p.vendeur if p.vendeur else None,
+        "vendeur": p.vendeur.to_dict() if p.vendeur else None,
         "stock": p.stock
     } for p in produits])
 

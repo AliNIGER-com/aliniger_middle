@@ -41,6 +41,7 @@ class User(db.Model):
 # --- Nouveau modèle Vendeur ---
 class Vendeur(db.Model):
     __tablename__ = 'vendeurs'
+    
     id = db.Column(db.Integer, primary_key=True)
     nom = db.Column(db.String(100), nullable=False)
     prenom = db.Column(db.String(100), nullable=False)
@@ -53,6 +54,19 @@ class Vendeur(db.Model):
 
     boutiques = db.relationship('Boutique', backref='vendeur', lazy=True)
     produits_afrique = db.relationship('ProduitAfrique', back_populates='vendeur')
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "nom": self.nom,
+            "prenom": self.prenom,
+            "email": self.email,
+            "tel": self.tel,
+            "adresse": self.adresse,
+            "ville": self.ville,
+            "pays": self.pays
+            # ⚠️ On n'inclut pas `mot_de_passe` pour des raisons de sécurité
+        }
 
 # --- Boutique ---
 class Boutique(db.Model):

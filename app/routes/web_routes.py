@@ -136,15 +136,18 @@ def voir_boutique(vendeur_id):
     produits = ProduitAlibaba.query.filter_by(vendeur=vendeur.nom).all()
     return render_template('voir_boutique.html', vendeur=vendeur, produits=produits, boutiques=boutiques)
 
-# === visionner liste boutique ===
+# === Visionner la liste des produits Afrique avec vendeurs associés ===
 @web_routes.route('/afrique')
 def voir_afrique():
     produits_afrique = ProduitAfrique.query.all()
+    vendeurs = Vendeur.query.all()  # Ajoute la liste des vendeurs
 
     return render_template(
         'produits_afrique.html',
-        produits_afrique=produits_afrique
+        produits_afrique=produits_afrique,
+        vendeurs=vendeurs  # Passe la liste à Jinja
     )
+
 
 # === visionner liste boutique ===
 @web_routes.route('/alibaba')
