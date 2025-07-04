@@ -12,7 +12,7 @@ def get_produits_afrique():
         "nom": p.nom,
         "description": p.description,
         "prix": p.prix,
-        "image": f"http://192.168.149.118:5000/static/assets/produits_afrique/{p.image}",
+        "image": url_for('static', filename=f'assets/produits_afrique/{p.image}', _external=True),
         "categorie": p.categorie,
         "vendeur_id": p.vendeur_id,
         "vendeur": p.vendeur if p.vendeur else None,
@@ -27,7 +27,7 @@ def get_produits_alibaba():
         "nom": p.nom,
         "description": p.description,
         "prix_estime": p.prix_estime,
-        "image": f"http://192.168.149.118:5000/static/images/{p.image}",
+        "image": url_for('static', filename=f'images/{p.image}', _external=True),
         "min_commande": p.min_commande,
         "frais_livraison_estime": p.frais_livraison_estime,
         "vendeur": p.vendeur,
@@ -88,6 +88,39 @@ def produits_afrique_similaires():
             "prix": p.prix,
             "origine": p.pays_origine,
             "image": p.image.split(',')[0] if p.image else ""
+        })
+
+    return jsonify(resultats), 200
+
+@produit_routes.route('/produits_alibaba_similaires', methods=['POST'])
+def produits_alibaba_similaires():
+    data = request.json
+    nom = data.get('nom', '').strip()
+    categorie = data.get('categorie', '').strip()
+
+    if not nom or not categorie:
+        return jsonify({"error": "Nom et catégorie sont requis."}), 400
+
+    # Rechercher dans les produits Alibaba
+    produits_similaires = ProduitAlibaba.query.filter(
+        func.lower(ProduitAlibaba.categorie) == categorie.lower(),
+        or_(
+            func.lower(ProduitAlibaba.nom).like(f"%{nom.lower()}%"),
+            func.lower(ProduitAlibaba.description).like(f"%{nom.lower()}%")
+        )
+    ).all()
+
+    resultats = []
+    for p in produits_similaires:
+        resultats.append({
+            "id": p.id,
+            "nom": p.nom,
+            "categorie": p.categorie,
+            "prix_estime": p.prix_estime,
+            "image": url_for('static', filename=f'images/{p.image}', _external=True),
+            "vendeur": p.vendeur,
+            "note": p.note,
+            "couleur": p.couleur
         })
 
     return jsonify(resultats), 200

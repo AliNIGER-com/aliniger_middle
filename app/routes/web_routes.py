@@ -217,16 +217,18 @@ def ajouter_produit_alibaba():
                 image_filenames.append(filename)
 
         produit = ProduitAlibaba(
-            nom=form.nom.data,
-            description=form.description.data,
-            prix_estime=form.prix_estime.data,
-            image=",".join(image_filenames),
-            min_commande=form.min_commande.data,
-            frais_livraison_estime=form.frais_livraison_estime.data,
-            vendeur=form.vendeur.data,
-            note=form.note.data,
-            couleur=form.couleur.data
-        )
+    nom=form.nom.data,
+    description=form.description.data,
+    prix_estime=form.prix_estime.data,
+    image=",".join(image_filenames),
+    min_commande=form.min_commande.data,
+    frais_livraison_estime=form.frais_livraison_estime.data,
+    categorie=form.categorie.data,          # <-- Ajouté ici
+    vendeur=form.vendeur.data,
+    note=form.note.data,
+    couleur=form.couleur.data
+)
+
         db.session.add(produit)
         db.session.commit()
         flash('Produit Alibaba ajouté avec succès.', 'success')
