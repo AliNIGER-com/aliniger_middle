@@ -94,7 +94,7 @@
                 </select>
               </td>
               <td class="text-center">
-                <a href="{{ url_for('web_routes.modifier_produit_afrique', id=p.id) }}" class="btn btn-sm btn-outline-primary btn-action">✏️ Modifier</a>
+                <a href="{{ url_for('web_routes.modifier_produit_afrique_inline', id=p.id) }}" class="btn btn-sm btn-outline-primary btn-action">✏️ Modifier</a>
                 <form action="{{ url_for('web_routes.supprimer_produit_afrique', id=p.id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Supprimer ce produit ?')">
                   <button type="submit" class="btn btn-sm btn-outline-danger btn-action">🗑 Supprimer</button>
                 </form>
