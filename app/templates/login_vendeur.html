@@ -50,31 +50,28 @@
 <div class="login-card">
   <h3 class="text-center login-title mb-4">Connexion Vendeur</h3>
 
-  <!-- Messages d'alerte -->
+  <!-- Messages d'erreur/succès -->
   {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
       {% for category, message in messages %}
-        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+        <div class="alert alert-{{ 'danger' if category == 'error' or category == 'danger' else 'success' }} alert-dismissible fade show" role="alert">
           {{ message }}
-          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fermer"></button>
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fermer l’alerte"></button>
         </div>
       {% endfor %}
     {% endif %}
   {% endwith %}
 
-  <!-- Formulaire de connexion -->
+  <!-- Formulaire de connexion par téléphone -->
   <form method="POST" action="{{ url_for('web_routes.login_vendeur') }}">
-    {{ form.csrf_token() if form and form.csrf_token }}
     <div class="mb-3">
-      <label for="email" class="form-label">Email</label>
-      <input type="email" id="email" name="email" class="form-control" required
-             title="Votre adresse email"
-             value="{{ request.form.email or '' }}">
+      <label for="tel" class="form-label">Numéro de téléphone</label>
+      <input type="tel" id="tel" name="tel" class="form-control" required placeholder="Ex : 90123456"
+             value="{{ request.form.tel or '' }}">
     </div>
     <div class="mb-3">
       <label for="mot_de_passe" class="form-label">Mot de passe</label>
-      <input type="password" id="mot_de_passe" name="mot_de_passe" class="form-control" required
-             title="Votre mot de passe">
+      <input type="password" id="mot_de_passe" name="mot_de_passe" class="form-control" required>
     </div>
     <button type="submit" class="btn btn-success w-100">Se connecter</button>
   </form>
@@ -86,8 +83,8 @@
   <!-- Formulaire de réinitialisation -->
   <form id="reset-form" class="mt-3" method="POST" action="{{ url_for('web_routes.demande_reset_mdp') }}">
     <div class="mb-2">
-      <label for="reset_email" class="form-label">Votre adresse email</label>
-      <input type="email" id="reset_email" name="email" class="form-control" required>
+      <label for="reset_tel" class="form-label">Votre numéro de téléphone</label>
+      <input type="tel" id="reset_tel" name="tel" class="form-control" required placeholder="Ex : 90123456">
     </div>
     <button type="submit" class="btn btn-outline-success w-100">Envoyer le lien de réinitialisation</button>
   </form>

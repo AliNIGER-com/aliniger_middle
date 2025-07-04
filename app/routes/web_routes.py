@@ -297,19 +297,15 @@ def ajouter_vendeur():
 @web_routes.route('/vendeur/login', methods=['GET', 'POST'])
 def login_vendeur():
     if request.method == 'POST':
-        email = request.form.get('email')
-        mot_de_passe = request.form.get('mot_de_passe')
-        vendeur = Vendeur.query.filter_by(email=email).first()
-        
+        tel = request.form['tel']
+        mot_de_passe = request.form['mot_de_passe']
+        vendeur = Vendeur.query.filter_by(tel=tel).first()
         if vendeur and check_password_hash(vendeur.mot_de_passe, mot_de_passe):
             login_user(vendeur)
-            flash("Connexion réussie", "success")
-            return redirect(url_for('web_routes.dashboard_vendeur'))
+            return redirect(url_for('dashboard_vendeur'))
         else:
-            flash('Identifiants invalides', 'danger')
-    
+            flash('Numéro ou mot de passe invalide.', 'danger')
     return render_template('login_vendeur.html')
-
 
 @web_routes.route('/vendeur/dashboard')
 @login_required
@@ -318,7 +314,6 @@ def dashboard_vendeur():
         return redirect(url_for('web_routes.login_vendeur'))
     
     return render_template('dashboard_vendeur.html', vendeur=current_user)
-
 
 @web_routes.route('/vendeur/logout')
 @login_required
