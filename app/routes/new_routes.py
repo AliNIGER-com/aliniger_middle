@@ -241,16 +241,16 @@ def get_paiement_config():
     try:
         config = {
             'methods': [
-                {'id': 'orange_money', 'name': 'Orange Money', 'enabled': True},
-                {'id': 'moov_money', 'name': 'Moov Money', 'enabled': True},
+                {'id': 'Nita', 'name': 'Nita', 'enabled': True},
+                {'id': 'Amana', 'name': 'Amana', 'enabled': True},
                 {'id': 'airtel_money', 'name': 'Airtel Money', 'enabled': True},
-                {'id': 'virement', 'name': 'Virement bancaire', 'enabled': True}
+                {'id': 'Payment à la livraison', 'name': 'Payment à la livraison', 'enabled': True}
             ],
             'fees': {
-                'orange_money': 0.02,
-                'moov_money': 0.025,
-                'airtel_money': 0.02,
-                'virement': 0.01
+                'Nita': 0.02,
+                'Amana': 0.025,
+                'Airtel Money': 0.02,
+                'Payment à la livraison': 0.01
             }
         }
         return jsonify(config), 200
@@ -424,7 +424,7 @@ def share_order():
         if not commande_check:
             return jsonify({'error': 'Commande non trouvée'}), 404
 
-        share_url = f"https://votre-app.com/orders/{commande_id}/share"
+        share_url = fshare_url = f"https://alinigermiddle-production.up.railway.app/orders/{commande_id}/share"
 
         sql = """
             INSERT INTO order_shares (commande_id, user_id, platform, message, date_share)
