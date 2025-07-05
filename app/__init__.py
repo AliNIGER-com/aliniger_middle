@@ -4,6 +4,7 @@ from flask_cors import CORS
 from flask_migrate import Migrate
 from flask_login import LoginManager
 from .config import Config
+import os
 
 # Initialisation des extensions
 db = SQLAlchemy()
@@ -19,6 +20,17 @@ def create_app():
 
     # ✅ Limite d'upload (50 Mo)
     app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024  # 50 MB
+
+    # ✅ Définition des dossiers d'uploads
+    app.config['UPLOAD_FOLDER'] = os.path.join('static', 'uploads')
+    app.config['UPLOAD_ALIBABA'] = os.path.join(app.config['UPLOAD_FOLDER'], 'alibaba')
+    app.config['UPLOAD_AFRIQUE'] = os.path.join(app.config['UPLOAD_FOLDER'], 'afrique')
+    app.config['UPLOAD_BOUTIQUE'] = os.path.join(app.config['UPLOAD_FOLDER'], 'boutique')
+
+    # ✅ Création des dossiers si pas encore présents
+    os.makedirs(app.config['UPLOAD_ALIBABA'], exist_ok=True)
+    os.makedirs(app.config['UPLOAD_AFRIQUE'], exist_ok=True)
+    os.makedirs(app.config['UPLOAD_BOUTIQUE'], exist_ok=True)
 
     # Initialisation des extensions
     db.init_app(app)

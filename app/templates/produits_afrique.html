@@ -70,6 +70,7 @@
             <th>Stock</th>
             <th>Vendeur</th>
             <th>Actions</th>
+            <th>Délai livraison</th>
           </tr>
         </thead>
         <tbody>
@@ -78,7 +79,7 @@
               <td contenteditable="true" data-field="nom" class="fw-semibold">{{ p.nom }}</td>
               <td>
                 {% for img in p.image.split(',') if img %}
-                  <img src="{{ url_for('static', filename='uploads/images/' ~ img) }}" alt="Image produit" />
+                  <img src="{{ url_for('static', filename='uploads/afrique/' ~ img) }}" alt="Image produit" />
                 {% endfor %}
               </td>
               <td contenteditable="true" data-field="prix"><strong>{{ p.prix }}</strong></td>
@@ -99,6 +100,7 @@
                   <button type="submit" class="btn btn-sm btn-outline-danger btn-action">🗑 Supprimer</button>
                 </form>
               </td>
+              <td contenteditable="true" data-field="delais_livraison">{{ p.delais_livraison or '' }}</td>
             </tr>
           {% endfor %}
         </tbody>

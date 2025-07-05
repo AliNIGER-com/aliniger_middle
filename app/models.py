@@ -99,6 +99,7 @@ class ProduitAfrique(db.Model):
     pays_origine = db.Column(db.String(50))
     categorie = db.Column(db.String(100))
     stock = db.Column(db.Integer)
+    delais_livraison = db.Column(db.String(100))  # ajout de la colonne délai de livraison
 
     vendeur_id = db.Column(db.Integer, db.ForeignKey('vendeurs.id'))
     boutique_id = db.Column(db.Integer, db.ForeignKey('boutiques.id'))
@@ -120,6 +121,7 @@ class ProduitAlibaba(db.Model):
     vendeur = db.Column(db.String(100))
     note = db.Column(db.Float)
     couleur = db.Column(db.String(50))
+    delais_livraison = db.Column(db.String(100))  # nouvelle colonne ajoutée
 
 # --- Commandes ---
 class Commande(db.Model):

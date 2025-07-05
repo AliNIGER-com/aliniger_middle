@@ -58,6 +58,7 @@
             <th>Catégorie</th>
             <th>Couleur</th>
             <th>Min Commande</th>
+            <th>Délai livraison</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -67,14 +68,17 @@
               <td contenteditable="true" data-field="nom" class="fw-semibold">{{ p.nom }}</td>
               <td>
                 {% for img in p.image.split(',') if img %}
-                  <img src="{{ url_for('static', filename='uploads/images/' ~ img) }}" alt="Image produit" />
+                  <img src="{{ url_for('static', filename='uploads/alibaba/' ~ img) }}" alt="Image produit" />
                 {% endfor %}
                 <small><em>Modifier les images inline n’est pas supporté.</em></small>
               </td>
               <td contenteditable="true" data-field="prix_estime">{{ p.prix_estime }}</td>
-              <td contenteditable="true" data-field="categorie"><span class="badge badge-categorie">{{ p.categorie }}</span></td>
+              <td contenteditable="true" data-field="categorie">
+                <span class="badge badge-categorie">{{ p.categorie }}</span>
+              </td>
               <td contenteditable="true" data-field="couleur">{{ p.couleur }}</td>
               <td contenteditable="true" data-field="min_commande">{{ p.min_commande }}</td>
+              <td contenteditable="true" data-field="delais_livraison">{{ p.delais_livraison or '' }}</td>
               <td class="text-center">
                 <form action="{{ url_for('web_routes.supprimer_produit_alibaba', id=p.id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Supprimer ce produit ?')">
                   <button type="submit" class="btn btn-sm btn-outline-danger btn-action">🗑 Supprimer</button>

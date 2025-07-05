@@ -71,39 +71,36 @@
           </tr>
         </thead>
         <tbody>
-          {% for b in boutiques %}
-            <tr data-id="{{ b.id }}">
-              <td contenteditable="true" data-field="nom" class="fw-semibold">{{ b.nom }}</td>
-              <td>
-                {% for img in b.image.split(',') if img %}
-                  <img src="{{ url_for('static', filename='uploads/images/' ~ img) }}" alt="Image Boutique" />
-                {% endfor %}
-              </td>
-              <td>
-                {% for vid in b.video.split(',') if vid %}
-                  <video controls>
-                    <source src="{{ url_for('static', filename='uploads/videos/' ~ vid) }}" type="video/mp4">
-                  </video>
-                {% endfor %}
-              </td>
-              <td contenteditable="true" data-field="note">{{ b.note }}</td>
-              <td contenteditable="true" data-field="localisation">{{ b.localisation }}</td>
-              <td>
-                <select data-field="vendeur_id" class="form-select form-select-sm" aria-label="Sélection du propriétaire">
-                  {% for v in vendeurs %}
-                    <option value="{{ v.id }}" {% if v.id == b.vendeur_id %}selected{% endif %}>{{ v.nom }} {{ v.prenom }}</option>
-                  {% endfor %}
-                </select>
-              </td>
-              <td class="text-center">
-                <a href="{{ url_for('web_routes.modifier_boutique_inline', id=b.id) }}" class="btn btn-sm btn-outline-primary btn-action">✏️ Modifier</a>
-                <form action="{{ url_for('web_routes.supprimer_boutique', id=b.id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Confirmer la suppression de cette boutique ?')">
-                  <button type="submit" class="btn btn-sm btn-outline-danger btn-action">🗑 Supprimer</button>
-                </form>
-              </td>
-            </tr>
-          {% endfor %}
-        </tbody>
+  {% for b in boutiques %}
+    <tr data-id="{{ b.id }}">
+      <td contenteditable="true" data-field="nom" class="fw-semibold">{{ b.nom }}</td>
+      <td>
+        {% for img in b.image.split(',') if img %}
+          <img src="{{ url_for('static', filename='uploads/boutique/' ~ img) }}" alt="Image Boutique" />
+        {% endfor %}
+      </td>
+      <td>
+        {% for vid in b.video.split(',') if vid %}
+          <video controls>
+            <source src="{{ url_for('static', filename='uploads/videos/' ~ vid) }}" type="video/mp4">
+          </video>
+        {% endfor %}
+      </td>
+      <td contenteditable="true" data-field="note">{{ b.note }}</td>
+      <td contenteditable="true" data-field="localisation">{{ b.localisation }}</td>
+      <td>
+        {{ b.vendeur.nom }} {{ b.vendeur.prenom }}
+      </td>
+      <td class="text-center">
+        <a href="{{ url_for('web_routes.modifier_boutique_inline', id=b.id) }}" class="btn btn-sm btn-outline-primary btn-action">✏️ Modifier</a>
+        <form action="{{ url_for('web_routes.supprimer_boutique', id=b.id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Confirmer la suppression de cette boutique ?')">
+          <button type="submit" class="btn btn-sm btn-outline-danger btn-action">🗑 Supprimer</button>
+        </form>
+      </td>
+    </tr>
+  {% endfor %}
+</tbody>
+
       </table>
     </div>
   {% else %}

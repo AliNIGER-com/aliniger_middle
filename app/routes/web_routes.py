@@ -129,14 +129,14 @@ def statistiques():
         taux_croissance=taux_croissance
     )
 
-
-# === visionner liste boutique ===
+# === Visionner la liste des boutiques ===
 @web_routes.route('/voir-boutique/<int:vendeur_id>')
 def voir_boutique(vendeur_id):
     vendeur = Vendeur.query.get_or_404(vendeur_id)
-    boutiques = Boutique.query.all()
+    boutiques = Boutique.query.filter_by(vendeur_id=vendeur.id).all()
     produits = ProduitAlibaba.query.filter_by(vendeur=vendeur.nom).all()
     return render_template('boutique.html', vendeur=vendeur, produits=produits, boutiques=boutiques)
+
 
 # === Visionner la liste des produits Afrique avec vendeurs associés ===
 @web_routes.route('/afrique')
@@ -175,34 +175,37 @@ def voir_vendeur():
 @web_routes.route('/ajouter-produit-afrique', methods=['GET', 'POST'])
 def ajouter_produit_afrique():
     form = ProduitAfriqueForm()
-    form.vendeur_id.choices = [(v.id, f"{v.nom} {v.prenom}") for v in Vendeur.query.all()]
-    # Charger dynamiquement les vendeurs pour le SelectField
-    boutique = Boutique.query.all()
-    form.boutique_id.choices = [(v.id, f"{v.nom}") for v in boutique]
+
     if form.validate_on_submit():
-        # Sauvegarde multiple d’images
         image_filenames = []
+        dossier_afrique = os.path.join('app/static/uploads/afrique')
+        os.makedirs(dossier_afrique, exist_ok=True)
+
         for file in request.files.getlist('images'):
-            if file.filename:
+            if file and file.filename:
                 filename = secure_filename(file.filename)
-                path = os.path.join(UPLOAD_FOLDER_IMAGES, filename)
+                ext = os.path.splitext(filename)[1]
+                new_name = f"{form.nom.data}_{int(datetime.utcnow().timestamp())}{ext}"
+                path = os.path.join(dossier_afrique, new_name)
                 file.save(path)
-                image_filenames.append(filename)
+                image_filenames.append(new_name)
 
         produit = ProduitAfrique(
-            nom=form.nom.data,
-            description=form.description.data,
-            prix=form.prix.data,
-            image=",".join(image_filenames),
-            pays_origine=form.pays_origine.data,
-            categorie=form.categorie.data,
-            stock=form.stock.data,
-            vendeur_id=form.vendeur_id.data,
-            boutique_id=form.boutique_id.data
-        )
+    nom=form.nom.data,
+    description=form.description.data,
+    prix=form.prix.data,
+    image=",".join(image_filenames),
+    pays_origine=form.pays_origine.data,
+    categorie=form.categorie.data,
+    stock=form.stock.data,
+    vendeur_id=form.vendeur_id.data,
+    boutique_id=form.boutique_id.data,
+    delais_livraison=form.delais_livraison.data  # Ajout du champ délai de livraison
+)
+
         db.session.add(produit)
         db.session.commit()
-        flash('Produit Afrique ajouté avec succès.', 'success')
+        flash('✅ Produit Afrique ajouté avec succès.', 'success')
         return redirect(url_for('web_routes.ajouter_produit_afrique'))
 
     return render_template('add_afrique.html', form=form)
@@ -211,14 +214,20 @@ def ajouter_produit_afrique():
 @web_routes.route('/ajouter-produit-alibaba', methods=['GET', 'POST'])
 def ajouter_produit_alibaba():
     form = ProduitAlibabaForm()
+
     if form.validate_on_submit():
         image_filenames = []
+        dossier_alibaba = os.path.join('app/static/uploads/alibaba')
+        os.makedirs(dossier_alibaba, exist_ok=True)
+
         for file in request.files.getlist('images'):
-            if file.filename:
+            if file and file.filename:
                 filename = secure_filename(file.filename)
-                path = os.path.join(UPLOAD_FOLDER_IMAGES, filename)
+                ext = os.path.splitext(filename)[1]
+                new_name = f"{form.nom.data}_{int(datetime.utcnow().timestamp())}{ext}"
+                path = os.path.join(dossier_alibaba, new_name)
                 file.save(path)
-                image_filenames.append(filename)
+                image_filenames.append(new_name)
 
         produit = ProduitAlibaba(
     nom=form.nom.data,
@@ -227,72 +236,79 @@ def ajouter_produit_alibaba():
     image=",".join(image_filenames),
     min_commande=form.min_commande.data,
     frais_livraison_estime=form.frais_livraison_estime.data,
-    categorie=form.categorie.data,          # <-- Ajouté ici
+    categorie=form.categorie.data,
     vendeur=form.vendeur.data,
     note=form.note.data,
-    couleur=form.couleur.data
+    couleur=form.couleur.data,
+    delais_livraison=form.delais_livraison.data  # Ajout du délai de livraison ici
 )
-
         db.session.add(produit)
         db.session.commit()
-        flash('Produit Alibaba ajouté avec succès.', 'success')
+        flash('✅ Produit Alibaba ajouté avec succès.', 'success')
         return redirect(url_for('web_routes.ajouter_produit_alibaba'))
+
     return render_template('add_alibaba.html', form=form)
 
-# === 3. Ajouter une Boutique ===
+# === 3. Ajouter Boutique ===
 @web_routes.route('/ajouter-boutique', methods=['GET', 'POST'])
 def ajouter_boutique():
     form = BoutiqueForm()
-    vendeurs = Vendeur.query.all()
-    form.vendeur_id.choices = [(v.id, f"{v.nom} {v.prenom}") for v in vendeurs]
 
     if form.validate_on_submit():
+        dossier_boutique = os.path.join('app/static/uploads/boutique')
+        dossier_videos = os.path.join('app/static/uploads/videos')
+        os.makedirs(dossier_boutique, exist_ok=True)
+        os.makedirs(dossier_videos, exist_ok=True)
+
         image_filenames = []
         video_filenames = []
 
-        # 👇 Nouveau : Sauvegarde de l'icône
+        # Icône/logo
         icone_filename = None
         icone_file = request.files.get('icone')
         if icone_file and icone_file.filename:
-            icone_filename = secure_filename(icone_file.filename)
-            icone_path = os.path.join(UPLOAD_FOLDER_IMAGES, icone_filename)
+            ext = os.path.splitext(icone_file.filename)[1]
+            icone_filename = f"icone_{form.nom.data}_{int(datetime.utcnow().timestamp())}{ext}"
+            icone_path = os.path.join(dossier_boutique, icone_filename)
             icone_file.save(icone_path)
 
-        # 👇 Images secondaires
+        # Images
         for file in request.files.getlist('images'):
-            if file.filename:
-                filename = secure_filename(file.filename)
-                path = os.path.join(UPLOAD_FOLDER_IMAGES, filename)
-                file.save(path)
-                image_filenames.append(filename)
+            if file and file.filename:
+                ext = os.path.splitext(file.filename)[1]
+                new_name = f"{form.nom.data}_{int(datetime.utcnow().timestamp())}_{len(image_filenames)}{ext}"
+                image_path = os.path.join(dossier_boutique, new_name)
+                file.save(image_path)
+                image_filenames.append(new_name)
 
-        # 👇 Vidéos
+        # Vidéos
         for video in request.files.getlist('videos'):
-            if video.filename:
-                filename = secure_filename(video.filename)
-                path = os.path.join(UPLOAD_FOLDER_VIDEOS, filename)
-                video.save(path)
-                video_filenames.append(filename)
+            if video and video.filename:
+                ext = os.path.splitext(video.filename)[1]
+                new_name = f"{form.nom.data}_vid_{int(datetime.utcnow().timestamp())}_{len(video_filenames)}{ext}"
+                video_path = os.path.join(dossier_videos, new_name)
+                video.save(video_path)
+                video_filenames.append(new_name)
 
         boutique = Boutique(
             nom=form.nom.data,
             description=form.description.data,
             localisation=form.localisation.data,
             note=form.note.data,
-            icone=icone_filename,  # 👈 Ici on ajoute l’icône
+            icone=icone_filename,
             image=",".join(image_filenames),
             video=",".join(video_filenames),
             vendeur_id=form.vendeur_id.data,
             pays=form.pays.data,
-            ville=form.ville.data  # si tu l’as ajouté dans le form
         )
         db.session.add(boutique)
         db.session.commit()
-        flash('Boutique ajoutée avec succès.', 'success')
+        flash('✅ Boutique ajoutée avec succès.', 'success')
         return redirect(url_for('web_routes.ajouter_boutique'))
 
     return render_template('add_boutique.html', form=form)
 
+# === 4. Ajouter Vendeur ===
 @web_routes.route('/ajouter-vendeur', methods=['GET', 'POST'])
 def ajouter_vendeur():
     form = VendeurForm()
