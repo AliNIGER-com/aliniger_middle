@@ -96,7 +96,7 @@
                 </select>
               </td>
               <td class="text-center">
-                <a href="{{ url_for('web_routes.modifier_boutique', id=b.id) }}" class="btn btn-sm btn-outline-primary btn-action">✏️ Modifier</a>
+                <a href="{{ url_for('web_routes.modifier_boutique_inline', id=b.id) }}" class="btn btn-sm btn-outline-primary btn-action">✏️ Modifier</a>
                 <form action="{{ url_for('web_routes.supprimer_boutique', id=b.id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Confirmer la suppression de cette boutique ?')">
                   <button type="submit" class="btn btn-sm btn-outline-danger btn-action">🗑 Supprimer</button>
                 </form>
