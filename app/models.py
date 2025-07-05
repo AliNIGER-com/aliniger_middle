@@ -76,13 +76,15 @@ class Boutique(db.Model):
     description = db.Column(db.Text)
     localisation = db.Column(db.String(255))
     note = db.Column(db.Float)
-    image = db.Column(db.Text)
+    image = db.Column(db.Text)          # plusieurs images (séparées par virgule)
+    icone = db.Column(db.String(255))  # nouvelle colonne pour une seule image (icone/logo)
     video = db.Column(db.Text)
     pays = db.Column(db.String(100))
-    ville = db.Column(db.String(100))  # ✅ ajouter cette ligne !
+    ville = db.Column(db.String(100))
     
     vendeur_id = db.Column(db.Integer, db.ForeignKey('vendeurs.id'), nullable=False)
     produits_afrique = db.relationship('ProduitAfrique', backref='boutique', lazy=True)
+
 
 
 # --- Produits Afrique ---

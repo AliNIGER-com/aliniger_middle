@@ -10,8 +10,8 @@ def get_boutiques():
         "id": b.id,
         "nom": b.nom,
         "description": b.description,
-        # ici on génère l'URL complète pour l'image
-        "image": url_for('static', filename=f'media/{b.image}', _external=True) if b.image else None,
+        "icone": b.icone,          # nouvelle donnée
+        "image": b.image,
         "video": b.video,
         "note": b.note,
         "localisation": b.localisation,
@@ -20,6 +20,7 @@ def get_boutiques():
         "vendeur_id": b.vendeur_id,
         "vendeur_nom": b.vendeur.nom if b.vendeur else None
     } for b in boutiques])
+
 
 @boutique_routes.route('/api/boutiques/<int:boutique_id>', methods=['GET'])
 def get_boutique_detail(boutique_id):

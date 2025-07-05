@@ -48,9 +48,14 @@ class BoutiqueForm(FlaskForm):
     description = StringField('Description')
     localisation = StringField('Localisation')
     note = FloatField('Note')
+
+    icone = FileField('Icône (logo)', validators=[
+        FileAllowed(['jpg', 'jpeg', 'png'], 'Images uniquement')
+    ])
     images = MultipleFileField('Images')
     videos = MultipleFileField('Vidéos')
-    vendeur_id = SelectField('Vendeur', coerce=int, validators=[DataRequired()])  # <- SELECTFIELD ici
+
+    vendeur_id = SelectField('Vendeur', coerce=int, validators=[DataRequired()])
     pays = StringField('Pays')
     submit = SubmitField('Ajouter')
 

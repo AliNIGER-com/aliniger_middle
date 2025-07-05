@@ -136,7 +136,7 @@ def voir_boutique(vendeur_id):
     vendeur = Vendeur.query.get_or_404(vendeur_id)
     boutiques = Boutique.query.all()
     produits = ProduitAlibaba.query.filter_by(vendeur=vendeur.nom).all()
-    return render_template('voir_boutique.html', vendeur=vendeur, produits=produits, boutiques=boutiques)
+    return render_template('boutique.html', vendeur=vendeur, produits=produits, boutiques=boutiques)
 
 # === Visionner la liste des produits Afrique avec vendeurs associés ===
 @web_routes.route('/afrique')
@@ -243,13 +243,22 @@ def ajouter_produit_alibaba():
 @web_routes.route('/ajouter-boutique', methods=['GET', 'POST'])
 def ajouter_boutique():
     form = BoutiqueForm()
-    # Charger dynamiquement les vendeurs pour le SelectField
     vendeurs = Vendeur.query.all()
     form.vendeur_id.choices = [(v.id, f"{v.nom} {v.prenom}") for v in vendeurs]
+
     if form.validate_on_submit():
         image_filenames = []
         video_filenames = []
 
+        # 👇 Nouveau : Sauvegarde de l'icône
+        icone_filename = None
+        icone_file = request.files.get('icone')
+        if icone_file and icone_file.filename:
+            icone_filename = secure_filename(icone_file.filename)
+            icone_path = os.path.join(UPLOAD_FOLDER_IMAGES, icone_filename)
+            icone_file.save(icone_path)
+
+        # 👇 Images secondaires
         for file in request.files.getlist('images'):
             if file.filename:
                 filename = secure_filename(file.filename)
@@ -257,6 +266,7 @@ def ajouter_boutique():
                 file.save(path)
                 image_filenames.append(filename)
 
+        # 👇 Vidéos
         for video in request.files.getlist('videos'):
             if video.filename:
                 filename = secure_filename(video.filename)
@@ -269,15 +279,18 @@ def ajouter_boutique():
             description=form.description.data,
             localisation=form.localisation.data,
             note=form.note.data,
+            icone=icone_filename,  # 👈 Ici on ajoute l’icône
             image=",".join(image_filenames),
             video=",".join(video_filenames),
             vendeur_id=form.vendeur_id.data,
-            pays=form.pays.data
+            pays=form.pays.data,
+            ville=form.ville.data  # si tu l’as ajouté dans le form
         )
         db.session.add(boutique)
         db.session.commit()
         flash('Boutique ajoutée avec succès.', 'success')
         return redirect(url_for('web_routes.ajouter_boutique'))
+
     return render_template('add_boutique.html', form=form)
 
 @web_routes.route('/ajouter-vendeur', methods=['GET', 'POST'])
