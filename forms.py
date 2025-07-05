@@ -25,8 +25,10 @@ class ProduitAfriqueForm(FlaskForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.vendeur_id.choices = [(v.id, f"{v.nom} {v.prenom}") for v in Vendeur.query.filter_by(role='vendeur').all()]
+        self.vendeur_id.choices = [(v.id, f"{v.nom} {v.prenom}") for v in Vendeur.query.all()]
         self.boutique_id.choices = [(b.id, b.nom) for b in Boutique.query.all()]
+
+
 
 # === PRODUIT ALIBABA ===
 class ProduitAlibabaForm(FlaskForm):
@@ -44,7 +46,6 @@ class ProduitAlibabaForm(FlaskForm):
     couleur = StringField('Couleur', validators=[Optional()])
     delais_livraison = StringField('Délai de livraison', validators=[Optional()])  # Ajouté ici
     submit = SubmitField('Ajouter produit Alibaba')
-
 
 # === BOUTIQUE ===
 class BoutiqueForm(FlaskForm):
