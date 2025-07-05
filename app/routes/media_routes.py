@@ -17,3 +17,9 @@ def get_images():
             url = url_for('static', filename=f'images/{filename}', _external=True)
             images.append(url)
     return jsonify(images)
+
+from flask import send_from_directory
+
+@media_routes.route('/static/uploads/images/<filename>')
+def serve_uploaded_image(filename):
+    return send_from_directory('static/uploads/images', filename)
