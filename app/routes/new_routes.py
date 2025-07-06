@@ -447,7 +447,8 @@ def update_user_profile(user_id):
             return jsonify({'error': 'Permission refusée'}), 403
 
         data = request.get_json()
-        allowed_fields = ['nom', 'prenom', 'email', 'tel', 'adresse', 'ville', 'pays']
+        # Changez 'tel' en 'telephone' pour correspondre au frontend
+        allowed_fields = ['nom', 'prenom', 'email', 'telephone', 'adresse', 'ville', 'pays']
 
         user = User.query.get(user_id)
         if not user:
@@ -469,94 +470,4 @@ def update_user_profile(user_id):
 
     except Exception as e:
         db.session.rollback()
-        return jsonify({'error': str(e)}), 500
-
-
-@new_routes.route('/users/<int:user_id>/avatar', methods=['PUT'])
-def update_user_avatar(user_id):
-    try:
-        data = request.form
-        user_id_form = int(user_id)  # from URL param
-        # Ici on ne vérifie pas de token, front doit gérer la sécurité
-        if 'avatar' not in request.files:
-            return jsonify({'error': 'Aucun fichier fourni'}), 400
-
-        file = request.files['avatar']
-        if file.filename == '':
-            return jsonify({'error': 'Aucun fichier sélectionné'}), 400
-
-        if file and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
-            unique_filename = f"{user_id_form}_{uuid.uuid4().hex}_{filename}"
-            os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-            file_path = os.path.join(UPLOAD_FOLDER, unique_filename)
-            file.save(file_path)
-
-            user = User.query.get(user_id_form)
-            if not user:
-                return jsonify({'error': 'Utilisateur non trouvé'}), 404
-
-            user.avatar_url = unique_filename
-            db.session.commit()
-
-            return jsonify({'avatarUrl': unique_filename}), 200
-        else:
-            return jsonify({'error': 'Type de fichier non autorisé'}), 400
-
-    except Exception as e:
-        db.session.rollback()
-        return jsonify({'error': str(e)}), 500
-
-
-@new_routes.route('/users/<int:user_id>/produits-inspires', methods=['GET'])
-def get_produits_inspires(user_id):
-    try:
-        data = request.get_json() or {}
-        current_user_id = data.get('user_id')
-        if current_user_id != user_id:
-            return jsonify({'error': 'Permission refusée'}), 403
-
-        subquery = (
-            db.session.query(DetailCommande.produit_id)
-            .join(Commande)
-            .filter(Commande.user_id == user_id)
-            .subquery()
-        )
-        produits = (
-            db.session.query(ProduitAfrique)
-            .join(DetailCommande)
-            .join(Commande)
-            .filter(Commande.user_id != user_id)
-            .filter(~ProduitAfrique.id.in_(subquery))
-            .order_by(ProduitAfrique.popularite.desc())
-            .limit(10)
-            .all()
-        )
-        return jsonify([p.to_dict() for p in produits]), 200
-
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-
-@new_routes.route('/users/<int:user_id>/referral-link', methods=['POST'])
-def generate_referral_link(user_id):
-    try:
-        data = request.get_json()
-        current_user_id = data.get('user_id')
-        if current_user_id != user_id:
-            return jsonify({'error': 'Permission refusée'}), 403
-
-        referral_code = f"ref-{user_id}-{uuid.uuid4().hex[:8]}"
-        base_url = "https://aliniger.com/signup"
-        referral_link = f"{base_url}?referral={referral_code}"
-
-        sql = """
-            INSERT INTO referral_codes (user_id, code, created_at)
-            VALUES (%s, %s, %s)
-        """
-        execute_query(sql, [user_id, referral_code, datetime.utcnow()], fetch_all=False)
-
-        return jsonify({'referralLink': referral_link}), 200
-
-    except Exception as e:
         return jsonify({'error': str(e)}), 500
