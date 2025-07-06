@@ -20,7 +20,8 @@ class ProduitAfriqueForm(FlaskForm):
     vendeur_id = SelectField('Vendeur', coerce=int, validators=[DataRequired()])
     boutique_id = SelectField('Boutique', coerce=int, validators=[DataRequired()])
     stock = IntegerField('Stock', validators=[Optional(), NumberRange(min=0)])
-    delais_livraison = StringField('Délai de livraison', validators=[Optional()])  # Ajouté ici
+    delais_livraison = StringField('Délai de livraison', validators=[Optional()])
+    Frais = StringField('Frais de livraison', validators=[Optional()]) 
     submit = SubmitField('Ajouter produit Afrique')
 
     def __init__(self, *args, **kwargs):

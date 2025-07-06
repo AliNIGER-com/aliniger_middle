@@ -1,23 +1,25 @@
-from flask import Blueprint, jsonify, url_for, current_app, request
-import os
-from ..models import ProduitAfrique, ProduitAlibaba
+from flask import Blueprint, jsonify, request
 from sqlalchemy import or_, func
+from ..models import ProduitAfrique, ProduitAlibaba
+
 produit_routes = Blueprint('produit_routes', __name__)
 
 @produit_routes.route('/api/produits_afrique', methods=['GET'])
 def get_produits_afrique():
     produits = ProduitAfrique.query.all()
-    
     return jsonify([{
         "id": p.id,
         "nom": p.nom,
         "description": p.description,
         "prix": p.prix,
-        "image": f"https://alinigermiddle-production.up.railway.app/media/{p.image}",
+        "image": f"/media/{p.image}" if p.image else None,
         "categorie": p.categorie,
         "vendeur_id": p.vendeur_id,
         "vendeur": p.vendeur.to_dict() if p.vendeur else None,
-        "stock": p.stock
+        "stock": p.stock,
+        "délai_livraison": p.delai_livraison,
+        "couleur": p.couleur,
+        "frais_livraison": p.frais_livraison
     } for p in produits])
 
 
@@ -29,42 +31,28 @@ def get_produits_alibaba():
         "nom": p.nom,
         "description": p.description,
         "prix_estime": p.prix_estime,
-        "image": f"https://alinigermiddle-production.up.railway.app/media/{p.image}",
+        "image": f"/media/{p.image}" if p.image else None,
         "min_commande": p.min_commande,
         "frais_livraison_estime": p.frais_livraison_estime,
         "vendeur": p.vendeur,
         "note": p.note,
-        "couleur": p.couleur
+        "couleur": p.couleur,
+        "délai_livraison": p.delai_livraison
     } for p in produits])
 
 
 @produit_routes.route('/api/categories', methods=['GET'])
 def get_categories():
     categories = [
-        "Électronique",
-        "Beauté",
-        "Industrie",
-        "Santé",
-        "Maison",
-        "Vêtements",
-        "Sport",
-        "Automobile",
-        "Jouets",
-        "Bricolage",
-        "Mobilier",
-        "Bijoux",
-        "Papeterie",
-        "Informatique",
-        "Chaussures",
-        "Alimentation",
-        "Accessoires",
-        "Montres",
-        "Téléphones",
-        "Éclairage",
+        "Électronique", "Beauté", "Industrie", "Santé", "Maison", "Vêtements",
+        "Sport", "Automobile", "Jouets", "Bricolage", "Mobilier", "Bijoux",
+        "Papeterie", "Informatique", "Chaussures", "Alimentation", "Accessoires",
+        "Montres", "Téléphones", "Éclairage"
     ]
     return jsonify(categories)
 
-@produit_routes.route('/produits_afrique_similaires', methods=['POST'])
+
+@produit_routes.route('/api/produits_afrique_similaires', methods=['POST'])
 def produits_afrique_similaires():
     data = request.json
     nom = data.get('nom', '').strip()
@@ -81,21 +69,19 @@ def produits_afrique_similaires():
         )
     ).all()
 
-    resultats = []
-    for p in produits_similaires:
-        resultats.append({
-            "id": p.id,
-            "nom": p.nom,
-            "categorie": p.categorie,
-            "prix": p.prix,
-            "origine": p.pays_origine,
-            "image": f"https://alinigermiddle-production.up.railway.app/media/{p.image.split(',')[0]}" if p.image else ""
-        })
+    resultats = [{
+        "id": p.id,
+        "nom": p.nom,
+        "categorie": p.categorie,
+        "prix": p.prix,
+        "origine": p.pays_origine,
+        "image": f"/media/{p.image.split(',')[0]}" if p.image else None
+    } for p in produits_similaires]
 
     return jsonify(resultats), 200
 
 
-@produit_routes.route('/produits_alibaba_similaires', methods=['POST'])
+@produit_routes.route('/api/produits_alibaba_similaires', methods=['POST'])
 def produits_alibaba_similaires():
     data = request.json
     nom = data.get('nom', '').strip()
@@ -112,17 +98,16 @@ def produits_alibaba_similaires():
         )
     ).all()
 
-    resultats = []
-    for p in produits_similaires:
-        resultats.append({
-            "id": p.id,
-            "nom": p.nom,
-            "categorie": p.categorie,
-            "prix_estime": p.prix_estime,
-            "image": f"https://alinigermiddle-production.up.railway.app/media/{p.image.split(',')[0]}" if p.image else "",
-            "vendeur": p.vendeur,
-            "note": p.note,
-            "couleur": p.couleur
-        })
+    resultats = [{
+        "id": p.id,
+        "nom": p.nom,
+        "categorie": p.categorie,
+        "prix_estime": p.prix_estime,
+        "image": f"/media/{p.image.split(',')[0]}" if p.image else None,
+        "vendeur": p.vendeur,
+        "note": p.note,
+        "couleur": p.couleur,
+        "délai_livraison": p.delai_livraison
+    } for p in produits_similaires]
 
     return jsonify(resultats), 200

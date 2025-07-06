@@ -8,28 +8,31 @@ def token_required(f):
     def decorated(*args, **kwargs):
         auth_header = request.headers.get('Authorization', '')
         token = None
+
         if auth_header.startswith('Bearer '):
             token = auth_header[7:]
-        
+
         if not token:
             return jsonify({'error': 'Token manquant'}), 401
-        
+
         try:
+            # Décodage du token
             data = jwt.decode(token, app.config['SECRET_KEY'], algorithms=["HS256"])
             user_id = data.get('user_id')
+
             if not user_id:
-                return jsonify({'error': 'Token invalide : user_id manquant'}), 401
-            
-            current_user = User.query.get(user_id)
-            if not current_user:
+                return jsonify({'error': 'Token invalide (user_id manquant)'}), 401
+
+            user = User.query.get(user_id)
+            if not user:
                 return jsonify({'error': 'Utilisateur non trouvé'}), 401
-            
+
         except jwt.ExpiredSignatureError:
             return jsonify({'error': 'Token expiré'}), 401
         except jwt.InvalidTokenError:
             return jsonify({'error': 'Token invalide'}), 401
         except Exception as e:
-            return jsonify({'error': 'Erreur lors de la vérification du token'}), 401
-        
-        return f(current_user, *args, **kwargs)
+            return jsonify({'error': f'Erreur de token: {str(e)}'}), 401
+
+        return f(user, *args, **kwargs)
     return decorated

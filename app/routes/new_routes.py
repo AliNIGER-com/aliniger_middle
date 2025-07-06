@@ -1,7 +1,4 @@
-# routes/new_routes.py
-
 from flask import Blueprint, request, jsonify, current_app
-from flask_jwt_extended import jwt_required, get_jwt_identity
 from werkzeug.utils import secure_filename
 from datetime import datetime
 import os
@@ -10,9 +7,10 @@ import uuid
 from app import db
 from app.models import (
     Boutique, ProduitAfrique, BoutiqueVisit, BoutiqueView,
-    Commande, DetailCommande, CommandeReview,
-    Paiement, Notification, User
+    Commande, DetailCommande, CommandeGroupee, Tracking,
+    CommandeReview, Paiement, Notification, User
 )
+from flask_jwt_extended import jwt_required, get_jwt_identity
 
 new_routes = Blueprint('new_routes', __name__)
 
@@ -21,6 +19,34 @@ ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+def execute_query(query, params=None, fetch_one=False, fetch_all=True):
+    """Exécute une requête SQL brute (à ajuster selon ta config)"""
+    try:
+        from app import get_db_connection
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        if params:
+            cursor.execute(query, params)
+        else:
+            cursor.execute(query)
+
+        if fetch_one:
+            result = cursor.fetchone()
+        elif fetch_all:
+            result = cursor.fetchall()
+        else:
+            result = None
+
+        conn.commit()
+        cursor.close()
+        conn.close()
+        return result
+    except Exception as e:
+        current_app.logger.error(f"Erreur DB: {e}")
+        return None
+
 
 # ==================== BOUTIQUES ====================
 
@@ -79,11 +105,10 @@ def get_boutique_produits(boutique_id):
         return jsonify({'error': str(e)}), 500
 
 @new_routes.route('/boutiques/visit', methods=['POST'])
-@jwt_required()
 def add_boutique_visit():
     try:
-        user_id = get_jwt_identity()
         data = request.get_json()
+        user_id = data.get('user_id')
         boutique_id = data.get('boutiqueId')
 
         if not boutique_id:
@@ -102,13 +127,14 @@ def add_boutique_visit():
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
 
+
 # ==================== COMMANDES ====================
 
 @new_routes.route('/commandes/details/<int:commande_id>', methods=['GET'])
-@jwt_required()
 def get_commande_details(commande_id):
     try:
-        user_id = get_jwt_identity()
+        data = request.get_json() or {}
+        user_id = data.get('user_id')  # user_id envoyé par le front
         commande = Commande.query.filter_by(id=commande_id, user_id=user_id).first()
         if not commande:
             return jsonify({'error': 'Commande non trouvée'}), 404
@@ -126,11 +152,10 @@ def get_commande_details(commande_id):
         return jsonify({'error': str(e)}), 500
 
 @new_routes.route('/commandes/<int:commande_id>/review', methods=['POST'])
-@jwt_required()
 def add_review(commande_id):
     try:
-        user_id = get_jwt_identity()
         data = request.get_json()
+        user_id = data.get('user_id')
         rating = data.get('rating')
         comment = data.get('comment', '')
 
@@ -157,11 +182,10 @@ def add_review(commande_id):
         return jsonify({'error': str(e)}), 500
 
 @new_routes.route('/commandes/<int:commande_id>/status', methods=['PUT'])
-@jwt_required()
 def update_commande_status(commande_id):
     try:
-        user_id = get_jwt_identity()
         data = request.get_json()
+        user_id = data.get('user_id')
         status = data.get('status')
         note = data.get('note', '')
 
@@ -189,49 +213,6 @@ def update_commande_status(commande_id):
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
-from flask import Blueprint, request, jsonify, current_app
-from flask_jwt_extended import jwt_required, get_jwt_identity
-from werkzeug.utils import secure_filename
-from datetime import datetime
-import os
-import uuid
-
-# Blueprint (déjà créé, mais je le rappelle ici pour cohérence)
-new_routes = Blueprint('new_routes', __name__)
-
-# Configuration upload
-UPLOAD_FOLDER = 'static/uploads'
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
-
-def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-
-def execute_query(query, params=None, fetch_one=False, fetch_all=True):
-    """Exécute une requête SQL brute (à ajuster selon ta config)"""
-    try:
-        from app import get_db_connection
-        conn = get_db_connection()
-        cursor = conn.cursor(dictionary=True)
-
-        if params:
-            cursor.execute(query, params)
-        else:
-            cursor.execute(query)
-
-        if fetch_one:
-            result = cursor.fetchone()
-        elif fetch_all:
-            result = cursor.fetchall()
-        else:
-            result = None
-
-        conn.commit()
-        cursor.close()
-        conn.close()
-        return result
-    except Exception as e:
-        current_app.logger.error(f"Erreur DB: {e}")
-        return None
 
 
 # ==================== PAIEMENTS ====================
@@ -259,21 +240,19 @@ def get_paiement_config():
 
 
 @new_routes.route('/paiements', methods=['POST'])
-@jwt_required()
 def create_paiement():
     try:
-        user_id = get_jwt_identity()
         data = request.get_json()
+        user_id = data.get('user_id')
         amount = data.get('amount')
         method = data.get('method')
         commande_id = data.get('commandeId')
 
-        if not all([amount, method, commande_id]):
+        if not all([user_id, amount, method, commande_id]):
             return jsonify({'error': 'Données manquantes'}), 400
 
         payment_id = f"PAY_{uuid.uuid4().hex[:12]}"
 
-        # Ici tu peux utiliser ORM ou insert SQL selon ton choix
         sql = """
             INSERT INTO paiements (payment_id, user_id, commande_id, amount, method, status, date_creation)
             VALUES (%s, %s, %s, %s, %s, %s, %s)
@@ -289,15 +268,15 @@ def create_paiement():
 
 
 @new_routes.route('/admin/validate-payment', methods=['POST'])
-@jwt_required()
 def validate_payment():
     try:
-        user_id = get_jwt_identity()
+        data = request.get_json()
+        user_id = data.get('user_id')
+
         user = User.query.get(user_id)
         if not user or not getattr(user, 'is_admin', False):
             return jsonify({'error': 'Permission refusée'}), 403
 
-        data = request.get_json()
         payment_id = data.get('paymentId')
         status = data.get('status')
 
@@ -323,12 +302,9 @@ def validate_payment():
 # ==================== NOTIFICATIONS ====================
 
 @new_routes.route('/notifications/nouvelle-commande', methods=['POST'])
-@jwt_required()
 def send_notification():
     try:
-        user_id = get_jwt_identity()
         data = request.get_json()
-
         commande_id = data.get('commandeId')
         vendeur_id = data.get('vendeurId')
         message = data.get('message')
@@ -355,12 +331,9 @@ def send_notification():
 
 
 @new_routes.route('/notifications/order-confirmation', methods=['POST'])
-@jwt_required()
 def send_order_confirmation():
     try:
-        user_id = get_jwt_identity()
         data = request.get_json()
-
         commande_id = data.get('commandeId')
         user_target_id = data.get('userId')
         details = data.get('details', {})
@@ -404,17 +377,15 @@ def get_frais_configuration():
 # ==================== PARTAGE ====================
 
 @new_routes.route('/orders/share', methods=['POST'])
-@jwt_required()
 def share_order():
     try:
-        user_id = get_jwt_identity()
         data = request.get_json()
-
+        user_id = data.get('user_id')
         commande_id = data.get('commandeId')
         platform = data.get('platform')
         message = data.get('message', '')
 
-        if not all([commande_id, platform]):
+        if not all([user_id, commande_id, platform]):
             return jsonify({'error': 'Données manquantes'}), 400
 
         # Vérifier que la commande appartient bien à l'utilisateur
@@ -424,7 +395,7 @@ def share_order():
         if not commande_check:
             return jsonify({'error': 'Commande non trouvée'}), 404
 
-        share_url = fshare_url = f"https://alinigermiddle-production.up.railway.app/orders/{commande_id}/share"
+        share_url = f"https://alinigermiddle-production.up.railway.app/orders/{commande_id}/share"
 
         sql = """
             INSERT INTO order_shares (commande_id, user_id, platform, message, date_share)
@@ -441,12 +412,10 @@ def share_order():
 # ==================== PRODUITS ====================
 
 @new_routes.route('/produits/view', methods=['POST'])
-@jwt_required()
 def add_product_view():
     try:
-        user_id = get_jwt_identity()
         data = request.get_json()
-
+        user_id = data.get('user_id')
         produit_id = data.get('produitId')
 
         if not produit_id:
@@ -504,13 +473,11 @@ def update_user_profile(user_id):
 
 
 @new_routes.route('/users/<int:user_id>/avatar', methods=['PUT'])
-@jwt_required()
 def update_user_avatar(user_id):
     try:
-        current_user_id = get_jwt_identity()
-        if current_user_id != user_id:
-            return jsonify({'error': 'Permission refusée'}), 403
-
+        data = request.form
+        user_id_form = int(user_id)  # from URL param
+        # Ici on ne vérifie pas de token, front doit gérer la sécurité
         if 'avatar' not in request.files:
             return jsonify({'error': 'Aucun fichier fourni'}), 400
 
@@ -520,12 +487,12 @@ def update_user_avatar(user_id):
 
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
-            unique_filename = f"{user_id}_{uuid.uuid4().hex}_{filename}"
+            unique_filename = f"{user_id_form}_{uuid.uuid4().hex}_{filename}"
             os.makedirs(UPLOAD_FOLDER, exist_ok=True)
             file_path = os.path.join(UPLOAD_FOLDER, unique_filename)
             file.save(file_path)
 
-            user = User.query.get(user_id)
+            user = User.query.get(user_id_form)
             if not user:
                 return jsonify({'error': 'Utilisateur non trouvé'}), 404
 
@@ -542,10 +509,10 @@ def update_user_avatar(user_id):
 
 
 @new_routes.route('/users/<int:user_id>/produits-inspires', methods=['GET'])
-@jwt_required()
 def get_produits_inspires(user_id):
     try:
-        current_user_id = get_jwt_identity()
+        data = request.get_json() or {}
+        current_user_id = data.get('user_id')
         if current_user_id != user_id:
             return jsonify({'error': 'Permission refusée'}), 403
 
@@ -572,10 +539,10 @@ def get_produits_inspires(user_id):
 
 
 @new_routes.route('/users/<int:user_id>/referral-link', methods=['POST'])
-@jwt_required()
 def generate_referral_link(user_id):
     try:
-        current_user_id = get_jwt_identity()
+        data = request.get_json()
+        current_user_id = data.get('user_id')
         if current_user_id != user_id:
             return jsonify({'error': 'Permission refusée'}), 403
 

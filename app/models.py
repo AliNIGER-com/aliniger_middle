@@ -23,20 +23,32 @@ class UserRoleEnum(enum.Enum):
     vendeur = "vendeur"
     admin = "admin"
 
+from enum import Enum as PyEnum
+from sqlalchemy import Enum
+
+class UserRoleEnum(PyEnum):
+    client = "client"
+    admin = "admin"
+
 class User(db.Model):
     __tablename__ = 'users'
+
     id = db.Column(db.Integer, primary_key=True)
     nom = db.Column(db.String(100), nullable=False)
-    prenom = db.Column(db.String(100), nullable=False)
-    email = db.Column(db.String(100), unique=True, nullable=False)
-    tel = db.Column(db.String(20))
-    mot_de_passe = db.Column(db.Text, nullable=False)
-    adresse = db.Column(db.Text)
-    ville = db.Column(db.String(100))
-    pays = db.Column(db.String(100))
+    tel = db.Column(db.String(20), nullable=False, unique=True)
+
+    # Champs optionnels pour mise à jour plus tard
+    prenom = db.Column(db.String(100), nullable=True)
+    email = db.Column(db.String(100), unique=True, nullable=True)
+    adresse = db.Column(db.Text, nullable=True)
+    ville = db.Column(db.String(100), nullable=True)
+    pays = db.Column(db.String(100), nullable=True)
+
+    # Plus besoin de mot de passe ni d'auth classique
     role = db.Column(Enum(UserRoleEnum), nullable=False, default=UserRoleEnum.client)
 
     commandes = db.relationship('Commande', backref='user', lazy=True)
+
 
 # --- Nouveau modèle Vendeur ---
 class Vendeur(db.Model):
@@ -100,6 +112,7 @@ class ProduitAfrique(db.Model):
     categorie = db.Column(db.String(100))
     stock = db.Column(db.Integer)
     delais_livraison = db.Column(db.String(100))  # ajout de la colonne délai de livraison
+    frais = db.Column(db.String(100))
 
     vendeur_id = db.Column(db.Integer, db.ForeignKey('vendeurs.id'))
     boutique_id = db.Column(db.Integer, db.ForeignKey('boutiques.id'))

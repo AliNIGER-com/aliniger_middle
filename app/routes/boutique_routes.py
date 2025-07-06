@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, url_for, current_app
+from flask import Blueprint, jsonify, current_app
 from ..models import Vendeur, Boutique, ProduitAfrique
 
 boutique_routes = Blueprint('boutique_routes', __name__)
@@ -10,9 +10,9 @@ def get_boutiques():
         "id": b.id,
         "nom": b.nom,
         "description": b.description,
-        "icone": b.icone,          # nouvelle donnée
-        "image": b.image,
-        "video": b.video,
+        "icone": f"/media/{b.icone}" if b.icone else None,
+        "image": f"/media/{b.image}" if b.image else None,
+        "video": f"/media/{b.video}" if b.video else None,
         "note": b.note,
         "localisation": b.localisation,
         "ville": b.ville,
@@ -30,8 +30,8 @@ def get_boutique_detail(boutique_id):
         "id": b.id,
         "nom": b.nom,
         "description": b.description,
-        "image": url_for('static', filename=f'media/{b.image}', _external=True) if b.image else None,
-        "video": b.video,
+        "image": f"/media/{b.image}" if b.image else None,
+        "video": f"/media/{b.video}" if b.video else None,
         "note": b.note,
         "localisation": b.localisation,
         "ville": b.ville,
@@ -43,11 +43,12 @@ def get_boutique_detail(boutique_id):
             "nom": p.nom,
             "description": p.description,
             "prix": p.prix,
-            "image": url_for('static', filename=f'media/{p.image}', _external=True) if p.image else None,
+            "image": f"/media/{p.image}" if p.image else None,
             "categorie": p.categorie,
             "stock": p.stock
         } for p in produits]
     })
+
 
 @boutique_routes.route('/api/vendeurs', methods=['GET'])
 def get_vendeurs():
@@ -61,8 +62,9 @@ def get_vendeurs():
         "ville": v.ville,
         "pays": v.pays,
         "description": v.description,
-        "image": url_for('static', filename=f'media/{v.image}', _external=True) if v.image else None
+        "image": f"/media/{v.image}" if v.image else None
     } for v in vendeurs])
+
 
 @boutique_routes.route('/api/vendeurs/<int:vendeur_id>', methods=['GET'])
 def get_vendeur_detail(vendeur_id):
@@ -76,5 +78,5 @@ def get_vendeur_detail(vendeur_id):
         "ville": v.ville,
         "pays": v.pays,
         "description": v.description,
-        "image": url_for('static', filename=f'media/{v.image}', _external=True) if v.image else None
+        "image": f"/media/{v.image}" if v.image else None
     })

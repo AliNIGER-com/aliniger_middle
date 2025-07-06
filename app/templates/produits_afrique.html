@@ -71,6 +71,7 @@
             <th>Vendeur</th>
             <th>Actions</th>
             <th>Délai livraison</th>
+            <th>Frais livraison</th>
           </tr>
         </thead>
         <tbody>
@@ -100,7 +101,8 @@
                   <button type="submit" class="btn btn-sm btn-outline-danger btn-action">🗑 Supprimer</button>
                 </form>
               </td>
-              <td contenteditable="true" data-field="delais_livraison">{{ p.delais_livraison or '' }}</td>
+              <td contenteditable="true" data-field="delais_livraison">{{ p.Frais or '' }}</td>
+              <td contenteditable="true" data-field="Frais">{{ p.Frais or '' }}</td>
             </tr>
           {% endfor %}
         </tbody>

@@ -200,7 +200,8 @@ def ajouter_produit_afrique():
     stock=form.stock.data,
     vendeur_id=form.vendeur_id.data,
     boutique_id=form.boutique_id.data,
-    delais_livraison=form.delais_livraison.data  # Ajout du champ délai de livraison
+    delais_livraison=form.delais_livraison.data,  # Ajout du champ délai de livraison
+    Frais=form.Frais.data
 )
 
         db.session.add(produit)
