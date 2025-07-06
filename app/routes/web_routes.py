@@ -622,3 +622,24 @@ def mettre_a_jour_statut_commande(id):
 @web_routes.app_errorhandler(413)
 def handle_file_too_large(error):
     return render_template('errors/413.html'), 413
+
+@web_routes.route('/inscription-vendeur', methods=['GET', 'POST'])
+def inscription_vendeur_public():
+    form = VendeurForm()
+    if form.validate_on_submit():
+        vendeur = Vendeur(
+            nom=form.nom.data,
+            prenom=form.prenom.data,
+            email=form.email.data,
+            tel=form.tel.data,
+            mot_de_passe=form.mot_de_passe.data,  # pense à hasher le mot de passe
+            adresse=form.adresse.data,
+            ville=form.ville.data,
+            pays=form.pays.data
+        )
+        db.session.add(vendeur)
+        db.session.commit()
+        flash("Inscription réussie ! Vous serez contacté sous peu.", "success")
+        return redirect(url_for('web_routes.inscription_vendeur_public'))
+
+    return render_template('ajouter_vendeur_public.html', form=form)
