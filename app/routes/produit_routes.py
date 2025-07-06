@@ -18,9 +18,8 @@ def get_produits_afrique():
         "vendeur": p.vendeur.to_dict() if p.vendeur else None,
         "stock": p.stock,
         "délai_livraison": p.delais_livraison,
-        "Frais": p.Frais
+        "frais": p.frais  # ✅ nom correct
     } for p in produits])
-
 
 @produit_routes.route('/api/produits_alibaba', methods=['GET'])
 def get_produits_alibaba():
