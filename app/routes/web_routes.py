@@ -309,7 +309,6 @@ def ajouter_boutique():
 
     return render_template('add_boutique.html', form=form)
 
-
 # === 4. Ajouter Vendeur ===
 @web_routes.route('/ajouter-vendeur', methods=['GET', 'POST'])
 def ajouter_vendeur():
