@@ -67,9 +67,13 @@
             <tr data-id="{{ p.id }}">
               <td contenteditable="true" data-field="nom" class="fw-semibold">{{ p.nom }}</td>
               <td>
-                {% for img in p.image.split(',') if img %}
-                  <img src="{{ url_for('static', filename='uploads/alibaba/' ~ img) }}" alt="Image produit" />
-                {% endfor %}
+                {% if p.image %}
+                  {% for img in p.image.split(',') if img %}
+                    <img src="{{ url_for('static', filename='uploads/alibaba/' ~ img) }}" alt="Image produit" />
+                  {% endfor %}
+                {% else %}
+                  <em>Aucune image</em>
+                {% endif %}
                 <small><em>Modifier les images inline n’est pas supporté.</em></small>
               </td>
               <td contenteditable="true" data-field="prix_estime">{{ p.prix_estime }}</td>

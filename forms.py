@@ -48,7 +48,6 @@ class ProduitAlibabaForm(FlaskForm):
     delais_livraison = StringField('Délai de livraison', validators=[Optional()])  # Ajouté ici
     submit = SubmitField('Ajouter produit Alibaba')
 
-# === BOUTIQUE ===
 class BoutiqueForm(FlaskForm):
     nom = StringField('Nom de la boutique', validators=[DataRequired()])
     description = StringField('Description', validators=[Optional()])
@@ -71,7 +70,8 @@ class BoutiqueForm(FlaskForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.vendeur_id.choices = [(v.id, f"{v.nom} {v.prenom}") for v in Vendeur.query.filter_by(role='vendeur').all()]
+        self.vendeur_id.choices = [(v.id, f"{v.nom} {v.prenom}") for v in Vendeur.query.all()]
+
 
 # === VENDEUR ===
 class VendeurForm(FlaskForm):
