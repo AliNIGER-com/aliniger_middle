@@ -17,9 +17,9 @@ def get_produits_afrique():
         "vendeur_id": p.vendeur_id,
         "vendeur": p.vendeur.to_dict() if p.vendeur else None,
         "stock": p.stock,
-        "délai_livraison": p.delai_livraison,
+        "délai_livraison": p.delais_livraison,
         "couleur": p.couleur,
-        "frais_livraison": p.frais_livraison
+        "Frais": p.Frais
     } for p in produits])
 
 
@@ -37,7 +37,7 @@ def get_produits_alibaba():
         "vendeur": p.vendeur,
         "note": p.note,
         "couleur": p.couleur,
-        "délai_livraison": p.delai_livraison
+        "délai_livraison": p.delais_livraison
     } for p in produits])
 
 
@@ -107,7 +107,7 @@ def produits_alibaba_similaires():
         "vendeur": p.vendeur,
         "note": p.note,
         "couleur": p.couleur,
-        "délai_livraison": p.delai_livraison
+        "délai_livraison": p.delais_livraison
     } for p in produits_similaires]
 
     return jsonify(resultats), 200
