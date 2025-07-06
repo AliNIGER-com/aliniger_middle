@@ -73,7 +73,7 @@ def get_vendeur_detail(vendeur_id):
         "id": v.id,
         "nom": v.nom,
         "email": v.email,
-        "telephone": v.telephone,
+        "telephone": v.tel,
         "adresse": v.adresse,
         "ville": v.ville,
         "pays": v.pays,
