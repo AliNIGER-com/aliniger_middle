@@ -5,31 +5,34 @@ from app import db
 
 auth_routes = Blueprint('auth_routes', __name__)
 
-# ➕ Enregistrement rapide (nom + téléphone)
+# ➕ Enregistrement sécurisé (nom + mot de passe hashé)
 @auth_routes.route('/api/users', methods=['POST'])
 def register_user():
     data = request.get_json()
     nom = data.get('nom')
-    tel = data.get('tel')
+    mot_de_passe = data.get('mot_de_passe')
 
-    if not nom or not tel:
-        return jsonify({'error': 'Nom et téléphone sont requis'}), 400
+    if not nom or not mot_de_passe:
+        return jsonify({'error': 'Nom et mot de passe requis'}), 400
 
-    # Vérifier si le numéro est déjà utilisé
-    existing_user = User.query.filter_by(tel=tel).first()
-    if existing_user:
-        return jsonify({
-            'message': 'Utilisateur déjà inscrit',
-            'user_id': existing_user.id,
-            'token': generate_token(existing_user.id)
-        }), 200
+    if len(mot_de_passe) < 6:
+        return jsonify({'error': 'Le mot de passe doit contenir au moins 6 caractères.'}), 400
 
-    # Création du nouvel utilisateur
-    new_user = User(nom=nom, tel=tel, prenom="", email="", adresse="", ville="", pays="")
+    new_user = User(
+        nom=nom,
+        prenom="",
+        email="",
+        adresse="",
+        ville="",
+        pays="",
+        tel="",
+        role="client"
+    )
+    new_user.set_password(mot_de_passe)
+
     db.session.add(new_user)
     db.session.commit()
 
-    # Générer un token JWT
     token = generate_token(new_user.id)
 
     return jsonify({
@@ -39,19 +42,20 @@ def register_user():
     }), 201
 
 
-# 🔐 Connexion rapide par téléphone
+# 🔐 Connexion avec vérification de mot de passe hashé
 @auth_routes.route('/api/login', methods=['POST'])
 def login_user():
     data = request.get_json()
-    tel = data.get('tel')
+    nom = data.get('nom')
+    mot_de_passe = data.get('mot_de_passe')
 
-    if not tel:
-        return jsonify({'error': 'Téléphone requis'}), 400
+    if not nom or not mot_de_passe:
+        return jsonify({'error': 'Nom et mot de passe requis'}), 400
 
-    user = User.query.filter_by(tel=tel).first()
+    user = User.query.filter_by(nom=nom).first()
 
-    if not user:
-        return jsonify({'error': 'Aucun utilisateur trouvé avec ce numéro'}), 404
+    if not user or not user.check_password(mot_de_passe):
+        return jsonify({'error': 'Nom ou mot de passe incorrect'}), 401
 
     token = generate_token(user.id)
 
@@ -62,13 +66,10 @@ def login_user():
     }), 200
 
 
-# ✅ Token sans expiration
+# ✅ Génération de token JWT sans expiration
 def generate_token(user_id):
     return jwt.encode(
-        {
-            'user_id': user_id
-            # pas de champ 'exp' donc pas d'expiration
-        },
+        {'user_id': user_id},
         app.config['SECRET_KEY'],
         algorithm='HS256'
     )

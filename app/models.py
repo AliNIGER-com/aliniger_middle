@@ -36,6 +36,7 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     nom = db.Column(db.String(100), nullable=False)
     tel = db.Column(db.String(20), nullable=False, unique=True)
+    mot_de_passe = db.Column(db.String(255), nullable=False)
 
     # Champs optionnels pour mise à jour plus tard
     prenom = db.Column(db.String(100), nullable=True)
