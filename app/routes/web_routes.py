@@ -643,3 +643,7 @@ def inscription_vendeur():
         return redirect(url_for('web_routes.inscription_vendeur'))
 
     return render_template('inscription_vendeur.html', form=form)
+
+@web_routes.route("/test")
+def test():
+    return "Le blueprint fonctionne !"
