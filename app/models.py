@@ -137,16 +137,28 @@ class ProduitAlibaba(db.Model):
     delais_livraison = db.Column(db.String(100))  # nouvelle colonne ajoutée
 
 # --- Commandes ---
+from datetime import datetime
+from app import db
+
 class Commande(db.Model):
     __tablename__ = 'commandes'
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    type_commande = db.Column(Enum(TypeCommandeEnum), nullable=False)
-    date_commande = db.Column(db.DateTime)
-    statut = db.Column(db.String(50))
 
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
+    type_commande = db.Column(db.String(50), nullable=False)  # Ex: "Alibaba", "Afrique", "Autre"
+    date_commande = db.Column(db.DateTime, default=datetime.utcnow)
+    statut = db.Column(db.String(50), default="En attente")
+
+    # Champs pour client hors plateforme
+    code_suivi = db.Column(db.String(100), unique=True)
+    nom_client = db.Column(db.String(100))
+    tel_client = db.Column(db.String(20))
+    adresse = db.Column(db.String(255))
+
+    # Relations
     details = db.relationship('DetailCommande', backref='commande', lazy=True)
     tracking = db.relationship('Tracking', backref='commande', lazy=True, uselist=False)
+
 
 class DetailCommande(db.Model):
     __tablename__ = 'details_commande'

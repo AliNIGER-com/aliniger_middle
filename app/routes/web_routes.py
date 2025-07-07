@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify
 from werkzeug.utils import secure_filename
 from app.models import db, ProduitAfrique, ProduitAlibaba, Boutique
-from forms import ProduitAfriqueForm, ProduitAlibabaForm, BoutiqueForm, VendeurForm
+from forms import ProduitAfriqueForm, ProduitAlibabaForm, BoutiqueForm, VendeurForm, CommandeForm
 import os
 from sqlalchemy import func, extract
 from app.models import Vendeur, Vente
@@ -12,7 +12,7 @@ from werkzeug.security import check_password_hash
 from sqlalchemy import desc
 
 
-web_routes = Blueprint('web_routes', __name__, url_prefix='/admin')
+web_routes = Blueprint('web_routes', __name__)  # ✅ Sans préfixe
 
 UPLOAD_FOLDER_IMAGES = 'app/static/uploads/images'
 UPLOAD_FOLDER_VIDEOS = 'app/static/uploads/videos'
@@ -644,6 +644,37 @@ def inscription_vendeur():
 
     return render_template('inscription_vendeur.html', form=form)
 
-@web_routes.route("/test")
-def test():
-    return "Le blueprint fonctionne !"
+@web_routes.route('/admin/commande/ajouter', methods=['GET', 'POST'])
+def ajouter_commande():
+    form = CommandeForm()
+
+    if form.validate_on_submit():
+        from uuid import uuid4
+        code = "CMD-" + str(uuid4())[:8].upper()
+
+        nouvelle_commande = Commande(
+            nom_client=form.nom_client.data,
+            tel_client=form.tel_client.data,
+            adresse=form.adresse.data,
+            type_commande=form.type_commande.data,
+            code_suivi=code,
+            statut='Lancé'  # statut initial
+        )
+
+        db.session.add(nouvelle_commande)
+        db.session.commit()
+
+        flash(f"✅ Commande ajoutée avec succès ! Code de suivi : {code}", "success")
+        return redirect(url_for('web_routes.ajouter_commande'))
+
+    return render_template('add_commande.html', form=form)
+
+@web_routes.route('/tracking/<code_suivi>')
+def suivi_commande(code_suivi):
+    commande = Commande.query.filter_by(code_suivi=code_suivi).first()
+
+    if not commande:
+        flash("❌ Code de suivi invalide ou commande introuvable.", "danger")
+        return redirect(url_for('web_routes.dashboard'))
+
+    return render_template('commande_tracking.html', commande=commande)

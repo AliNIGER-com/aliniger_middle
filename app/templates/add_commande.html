@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Ajouter une Boutique</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+  <div class="container mt-5">
+    <h2 class="mb-4 text-success">📦 Ajouter une nouvelle commande</h2>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for category, message in messages %}
+        <div class="alert alert-{{ category }}">{{ message }}</div>
+      {% endfor %}
+    {% endwith %}
+
+    <form method="POST">
+      {{ form.hidden_tag() }}
+
+      <div class="mb-3">
+        {{ form.nom_client.label(class="form-label") }}
+        {{ form.nom_client(class="form-control") }}
+      </div>
+
+      <div class="mb-3">
+        {{ form.tel_client.label(class="form-label") }}
+        {{ form.tel_client(class="form-control") }}
+      </div>
+
+      <div class="mb-3">
+        {{ form.adresse.label(class="form-label") }}
+        {{ form.adresse(class="form-control") }}
+      </div>
+
+      <div class="mb-3">
+        {{ form.type_commande.label(class="form-label") }}
+        {{ form.type_commande(class="form-control") }}
+      </div>
+
+      <div class="mb-3">
+        {{ form.code_suivi.label(class="form-label") }}
+        {{ form.code_suivi(class="form-control", value='Auto-généré') }}
+      </div>
+
+      <div class="d-grid">
+        {{ form.submit(class="btn btn-success btn-lg") }}
+      </div>
+    </form>
+  </div>
+</body>
+</html>

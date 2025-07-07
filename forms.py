@@ -84,3 +84,14 @@ class VendeurForm(FlaskForm):
     ville = StringField('Ville', validators=[Optional()])
     pays = StringField('Pays', validators=[Optional()])
     submit = SubmitField('Créer le vendeur')
+
+class CommandeForm(FlaskForm):
+    nom_client = StringField('Nom du client', validators=[DataRequired()])
+    tel_client = StringField('Téléphone du client', validators=[DataRequired()])
+    adresse = StringField('Adresse de livraison', validators=[DataRequired()])
+    type_commande = SelectField('Type de commande', choices=[
+        ('alibaba', 'Commande Alibaba'),
+        ('afrique', 'Produit Afrique')
+    ], validators=[DataRequired()])
+    code_suivi = StringField('Code de suivi (auto)', render_kw={'readonly': True})
+    submit = SubmitField('Créer la commande')

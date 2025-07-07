@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Suivi de Commande</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background-color: #f8f9fa;
+      font-family: 'Segoe UI', sans-serif;
+    }
+    .tracking-container {
+      max-width: 600px;
+      margin: 50px auto;
+      padding: 30px;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    }
+    .status-step {
+      margin-bottom: 20px;
+    }
+    .step-active {
+      font-weight: bold;
+      color: #28a745;
+    }
+  </style>
+</head>
+<body>
+  <div class="tracking-container">
+    <h3 class="text-center mb-4">📦 Suivi de votre commande</h3>
+
+    <p><strong>Nom :</strong> {{ commande.nom_client }}</p>
+    <p><strong>Téléphone :</strong> {{ commande.tel_client }}</p>
+    <p><strong>Adresse :</strong> {{ commande.adresse }}</p>
+    <p><strong>Code de suivi :</strong> {{ commande.code_suivi }}</p>
+    <p><strong>Type :</strong> {{ commande.type_commande | capitalize }}</p>
+    <p><strong>Date :</strong> {{ commande.date_commande.strftime('%d/%m/%Y à %H:%M') }}</p>
+    <p><strong>Statut :</strong> <span class="text-primary">{{ commande.statut }}</span></p>
+
+    <hr>
+    <h5>🔄 Étapes de la commande</h5>
+    <div class="status-step {% if commande.statut in ['Lancé', 'En cours de lancement', 'En préparation', 'Expédié', 'Livré'] %}step-active{% endif %}">1. Commande lancée</div>
+    <div class="status-step {% if commande.statut in ['En cours de lancement', 'En préparation', 'Expédié', 'Livré'] %}step-active{% endif %}">2. En traitement</div>
+    <div class="status-step {% if commande.statut in ['En préparation', 'Expédié', 'Livré'] %}step-active{% endif %}">3. Préparation</div>
+    <div class="status-step {% if commande.statut in ['Expédié', 'Livré'] %}step-active{% endif %}">4. Expédiée</div>
+    <div class="status-step {% if commande.statut == 'Livré' %}step-active{% endif %}">5. Livrée</div>
+  </div>
+</body>
+</html>
