@@ -22,7 +22,7 @@ os.makedirs(UPLOAD_FOLDER_IMAGES, exist_ok=True)
 os.makedirs(UPLOAD_FOLDER_VIDEOS, exist_ok=True)
 
 # Dashboard
-@web_routes.route('/')
+@web_routes.route('/dashboard')
 def dashboard():
     vendeur = Vendeur.query.first()  # Ou vendeur connecté
     return render_template('index.html', vendeur=vendeur)
