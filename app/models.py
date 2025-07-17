@@ -35,17 +35,14 @@ class User(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     nom = db.Column(db.String(100), nullable=False)
+    prenom = db.Column(db.String(100), nullable=False)
     tel = db.Column(db.String(20), nullable=False, unique=True)
+    email = db.Column(db.String(100), nullable=False, unique=True)
     mot_de_passe = db.Column(db.String(255), nullable=False)
+    adresse = db.Column(db.Text, nullable=False)
+    ville = db.Column(db.String(100), nullable=False)
+    pays = db.Column(db.String(100), nullable=False)
 
-    # Champs optionnels pour mise à jour plus tard
-    prenom = db.Column(db.String(100), nullable=True)
-    email = db.Column(db.String(100), unique=True, nullable=True)
-    adresse = db.Column(db.Text, nullable=True)
-    ville = db.Column(db.String(100), nullable=True)
-    pays = db.Column(db.String(100), nullable=True)
-
-    # Plus besoin de mot de passe ni d'auth classique
     role = db.Column(Enum(UserRoleEnum), nullable=False, default=UserRoleEnum.client)
 
     commandes = db.relationship('Commande', backref='user', lazy=True)
@@ -281,3 +278,5 @@ class ProductView(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
     ip_address = db.Column(db.String(100))
+
+

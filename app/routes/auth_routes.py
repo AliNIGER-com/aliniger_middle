@@ -5,27 +5,35 @@ from app import db
 
 auth_routes = Blueprint('auth_routes', __name__)
 
-# ➕ Enregistrement sécurisé (nom + mot de passe hashé)
+# ➕ Enregistrement sécurisé (tous les champs requis)
 @auth_routes.route('/api/users', methods=['POST'])
 def register_user():
     data = request.get_json()
-    nom = data.get('nom')
+
+    required_fields = ['nom', 'prenom', 'email', 'tel', 'adresse', 'ville', 'pays', 'mot_de_passe']
+    for field in required_fields:
+        if not data.get(field):
+            return jsonify({'error': f'Le champ {field} est requis.'}), 400
+
     mot_de_passe = data.get('mot_de_passe')
-
-    if not nom or not mot_de_passe:
-        return jsonify({'error': 'Nom et mot de passe requis'}), 400
-
     if len(mot_de_passe) < 6:
         return jsonify({'error': 'Le mot de passe doit contenir au moins 6 caractères.'}), 400
 
+    # Vérification email ou téléphone déjà utilisé
+    if User.query.filter_by(email=data['email']).first():
+        return jsonify({'error': 'Cet email est déjà utilisé.'}), 400
+
+    if User.query.filter_by(tel=data['tel']).first():
+        return jsonify({'error': 'Ce numéro de téléphone est déjà utilisé.'}), 400
+
     new_user = User(
-        nom=nom,
-        prenom="",
-        email="",
-        adresse="",
-        ville="",
-        pays="",
-        tel="",
+        nom=data['nom'],
+        prenom=data['prenom'],
+        email=data['email'],
+        tel=data['tel'],
+        adresse=data['adresse'],
+        ville=data['ville'],
+        pays=data['pays'],
         role="client"
     )
     new_user.set_password(mot_de_passe)
@@ -42,20 +50,22 @@ def register_user():
     }), 201
 
 
-# 🔐 Connexion avec vérification de mot de passe hashé
+# 🔐 Connexion (par email ou téléphone)
 @auth_routes.route('/api/login', methods=['POST'])
 def login_user():
     data = request.get_json()
-    nom = data.get('nom')
+    identifiant = data.get('identifiant')  # Email ou téléphone
     mot_de_passe = data.get('mot_de_passe')
 
-    if not nom or not mot_de_passe:
-        return jsonify({'error': 'Nom et mot de passe requis'}), 400
+    if not identifiant or not mot_de_passe:
+        return jsonify({'error': 'Identifiant (email ou téléphone) et mot de passe requis.'}), 400
 
-    user = User.query.filter_by(nom=nom).first()
+    user = User.query.filter(
+        (User.email == identifiant) | (User.tel == identifiant)
+    ).first()
 
     if not user or not user.check_password(mot_de_passe):
-        return jsonify({'error': 'Nom ou mot de passe incorrect'}), 401
+        return jsonify({'error': 'Identifiant ou mot de passe incorrect.'}), 401
 
     token = generate_token(user.id)
 
@@ -66,7 +76,7 @@ def login_user():
     }), 200
 
 
-# ✅ Génération de token JWT sans expiration
+# ✅ Génération du token JWT
 def generate_token(user_id):
     return jwt.encode(
         {'user_id': user_id},
