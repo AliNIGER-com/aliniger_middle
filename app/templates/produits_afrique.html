@@ -101,8 +101,9 @@
                   <button type="submit" class="btn btn-sm btn-outline-danger btn-action">🗑 Supprimer</button>
                 </form>
               </td>
-              <td contenteditable="true" data-field="delais_livraison">{{ p.Frais or '' }}</td>
+              <td contenteditable="true" data-field="delais_livraison">{{ p.delais_livraison or '' }}</td>
               <td contenteditable="true" data-field="Frais">{{ p.Frais or '' }}</td>
+              <td contenteditable="true" data-field="Couleur">{{ p.Couleur or '' }}</td>
             </tr>
           {% endfor %}
         </tbody>
