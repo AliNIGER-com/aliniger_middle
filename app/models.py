@@ -110,7 +110,7 @@ class ProduitAfrique(db.Model):
     categorie = db.Column(db.String(100))
     stock = db.Column(db.Integer)
     delais_livraison = db.Column(db.String(100))  # ajout de la colonne délai de livraison
-    frais = db.Column(db.String(100))
+    Frais = db.Column(db.String(100))
 
     vendeur_id = db.Column(db.Integer, db.ForeignKey('vendeurs.id'))
     boutique_id = db.Column(db.Integer, db.ForeignKey('boutiques.id'))

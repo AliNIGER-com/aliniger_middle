@@ -1,4 +1,4 @@
-from flask import request, jsonify, current_app as app
+from flask import request, jsonify, current_app
 from functools import wraps
 import jwt
 from ..models import User
@@ -16,8 +16,7 @@ def token_required(f):
             return jsonify({'error': 'Token manquant'}), 401
 
         try:
-            # Décodage du token
-            data = jwt.decode(token, app.config['SECRET_KEY'], algorithms=["HS256"])
+            data = jwt.decode(token, current_app.config['JWT_SECRET_KEY'], algorithms=["HS256"])
             user_id = data.get('user_id')
 
             if not user_id:
@@ -36,3 +35,11 @@ def token_required(f):
 
         return f(user, *args, **kwargs)
     return decorated
+
+
+def generate_token(user_id):
+    return jwt.encode(
+        {'user_id': user_id},
+        current_app.config['JWT_SECRET_KEY'],
+        algorithm='HS256'
+    )
