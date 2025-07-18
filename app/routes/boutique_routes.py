@@ -30,8 +30,8 @@ def get_boutique_detail(boutique_id):
         "id": b.id,
         "nom": b.nom,
         "description": b.description,
-        "image": f"/media/{b.image}" if b.image else None,
-        "video": f"/media/{b.video}" if b.video else None,
+        "image": f"/uploads/boutique/{b.image}" if b.image else None,
+        "video": f"/uploads/boutique/{b.video}" if b.video else None,
         "note": b.note,
         "localisation": b.localisation,
         "ville": b.ville,
@@ -43,7 +43,7 @@ def get_boutique_detail(boutique_id):
             "nom": p.nom,
             "description": p.description,
             "prix": p.prix,
-            "image": f"/media/{p.image}" if p.image else None,
+            "image": f"/uploads/afrique/{p.image}" if p.image else None,
             "categorie": p.categorie,
             "stock": p.stock
         } for p in produits]
