@@ -18,7 +18,7 @@ def get_produits_afrique():
         "vendeur": p.vendeur.to_dict() if p.vendeur else None,
         "stock": p.stock,
         "délai_livraison": p.delais_livraison,
-        "frais": p.frais,
+        "frais": p.Frais,
         "couleur": p.couleur
     } for p in produits])
 

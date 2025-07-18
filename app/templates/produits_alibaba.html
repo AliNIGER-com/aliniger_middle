@@ -75,9 +75,6 @@
     <em>Aucune image</em>
   {% endif %}
 </td>
-
-                <small><em>Modifier les images inline n’est pas supporté.</em></small>
-              </td>
               <td contenteditable="true" data-field="prix_estime">{{ p.prix_estime }}</td>
               <td contenteditable="true" data-field="categorie">
                 <span class="badge badge-categorie">{{ p.categorie }}</span>
@@ -94,6 +91,9 @@
           {% endfor %}
         </tbody>
       </table>
+      <div class="text-muted small mt-2">
+        <em>Modifier les images inline n’est pas supporté.</em>
+      </div>
     </div>
   {% else %}
     <div class="alert alert-info text-center">
