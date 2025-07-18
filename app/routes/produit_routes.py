@@ -19,7 +19,7 @@ def get_produits_afrique():
         "stock": p.stock,
         "délai_livraison": p.delais_livraison,
         "frais": p.Frais,
-        "couleur": p.couleur
+        "couleur": p.Couleur
     } for p in produits])
 
 @produit_routes.route('/api/produits_alibaba', methods=['GET'])
