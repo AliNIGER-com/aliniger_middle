@@ -438,6 +438,10 @@ def add_product_view():
 
 # ==================== UTILISATEURS ====================
 
+from flask_jwt_extended import jwt_required, get_jwt_identity
+from flask import request, jsonify
+from datetime import datetime
+
 @new_routes.route('/users/<int:user_id>', methods=['PUT'])
 @jwt_required()
 def update_user_profile(user_id):
@@ -447,8 +451,11 @@ def update_user_profile(user_id):
             return jsonify({'error': 'Permission refusée'}), 403
 
         data = request.get_json()
-        # Changez 'tel' en 'telephone' pour correspondre au frontend
         allowed_fields = ['nom', 'prenom', 'email', 'telephone', 'adresse', 'ville', 'pays']
+
+        field_map = {
+            'telephone': 'tel'  # correspondance frontend/backend
+        }
 
         user = User.query.get(user_id)
         if not user:
@@ -457,15 +464,18 @@ def update_user_profile(user_id):
         modified = False
         for field in allowed_fields:
             if field in data:
-                setattr(user, field, data[field])
+                attr = field_map.get(field, field)
+                setattr(user, attr, data[field])
                 modified = True
 
         if not modified:
             return jsonify({'error': 'Aucun champ à modifier'}), 400
 
-        user.date_maj = datetime.utcnow()
-        db.session.commit()
+        # Si date_maj est défini dans User
+        if hasattr(user, 'date_maj'):
+            user.date_maj = datetime.utcnow()
 
+        db.session.commit()
         return jsonify({'user': user.to_dict()}), 200
 
     except Exception as e:
