@@ -1,10 +1,8 @@
-# app/config.py
 import os
 
 class Config:
     SQLALCHEMY_DATABASE_URI = (
-        'mysql+mysqlconnector://root:TkAdlBaXUclWYbIPUhTprVWwXBwQFqIa'
-        '@crossover.proxy.rlwy.net:43313/railway'
+        'mysql+mysqlconnector://ibrahim:ibbigboSS227@@localhost:3306/flaskdb'
     )
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 

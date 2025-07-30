@@ -19,4 +19,4 @@ def register_routes(app):
     app.register_blueprint(web_routes)  # Enregistrement du nouveau
     app.register_blueprint(new_routes, url_prefix='/api')
     app.register_blueprint(public_routes)  # public
-    app.register_blueprint(notification_routes)  # public
+    app.register_blueprint(notification_routes)  
